@@ -20,6 +20,17 @@ const topicRefSchema = {
     .optional(),
 };
 
+const postRefSchema = {
+  id: z.string().trim().min(1).optional(),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
+};
+
 export const postInputSchema = z
   .object({
     title: z.string().trim().min(4).max(140),
@@ -44,6 +55,35 @@ export const postInputSchema = z
       });
     }
   });
+
+export const postUpdateSchema = z
+  .object({
+    ...postRefSchema,
+    title: z.string().trim().min(4).max(140).optional(),
+    body: z.string().trim().min(20).max(12000).optional(),
+    ...authorRefSchema,
+    ...topicRefSchema,
+  })
+  .superRefine((payload, context) => {
+    requirePostRef(payload, context);
+
+    if (
+      !payload.title &&
+      !payload.body &&
+      !payload.authorId &&
+      !payload.authorTwitterId &&
+      !payload.topicId &&
+      !payload.topicSlug
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one post field is required.",
+        path: ["title"],
+      });
+    }
+  });
+
+export const postDeleteSchema = z.object(postRefSchema).superRefine(requirePostRef);
 
 export const commentInputSchema = z
   .object({
@@ -121,6 +161,123 @@ export async function createModeratedPost(input: unknown) {
     post,
     moderation,
   };
+}
+
+export async function updatePost(input: unknown) {
+  const payload = postUpdateSchema.parse(input);
+  const existing = await prisma.post.findUnique({
+    where: postWhereUnique(payload),
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      body: true,
+      publishedAt: true,
+      topic: {
+        select: {
+          slug: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new PublishingInputError("Post not found.", 404);
+  }
+
+  const [author, topic] = await Promise.all([
+    hasAuthorRef(payload) ? resolveAuthor(payload) : null,
+    hasTopicRef(payload) ? resolveTopic(payload) : null,
+  ]);
+  const shouldModerate = Boolean(payload.title || payload.body);
+  const moderation = shouldModerate
+    ? await moderateSubmission({
+        kind: "post",
+        title: payload.title ?? existing.title,
+        body: payload.body ?? existing.body,
+      })
+    : null;
+  const data: Prisma.PostUpdateInput = {};
+
+  if (payload.title) {
+    data.title = payload.title;
+  }
+
+  if (payload.body) {
+    data.body = payload.body;
+  }
+
+  if (author) {
+    data.author = {
+      connect: {
+        id: author.id,
+      },
+    };
+  }
+
+  if (topic) {
+    data.topic = {
+      connect: {
+        id: topic.id,
+      },
+    };
+  }
+
+  if (moderation) {
+    const isApproved = moderation.status === PublicationStatus.APPROVED;
+
+    data.status = moderation.status;
+    data.links = toJson(moderation.links.links);
+    data.publishedAt = isApproved ? existing.publishedAt ?? new Date() : null;
+    data.decisions = {
+      create: moderationDecisionData("post", moderation),
+    };
+  }
+
+  const post = await prisma.post.update({
+    where: {
+      id: existing.id,
+    },
+    data,
+    include: {
+      author: true,
+      topic: true,
+    },
+  });
+
+  return {
+    post,
+    moderation,
+    previous: existing,
+  };
+}
+
+export async function deletePost(input: unknown) {
+  const payload = postDeleteSchema.parse(input);
+  const post = await prisma.post.findUnique({
+    where: postWhereUnique(payload),
+    select: {
+      id: true,
+      slug: true,
+      topic: {
+        select: {
+          slug: true,
+        },
+      },
+    },
+  });
+
+  if (!post) {
+    throw new PublishingInputError("Post not found.", 404);
+  }
+
+  await prisma.post.delete({
+    where: {
+      id: post.id,
+    },
+  });
+
+  return post;
 }
 
 export async function createModeratedComment(input: unknown) {
@@ -217,6 +374,52 @@ async function resolveOptionalAuthor(input: {
   }
 
   return null;
+}
+
+function requirePostRef(
+  input: {
+    id?: string;
+    slug?: string;
+  },
+  context: z.RefinementCtx,
+) {
+  if (!input.id && !input.slug) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "A post id or slug is required.",
+      path: ["id"],
+    });
+  }
+}
+
+function postWhereUnique(input: {
+  id?: string;
+  slug?: string;
+}): Prisma.PostWhereUniqueInput {
+  if (input.id) {
+    return {
+      id: input.id,
+    };
+  }
+
+  if (input.slug) {
+    return {
+      slug: input.slug,
+    };
+  }
+
+  throw new PublishingInputError("A post id or slug is required.");
+}
+
+function hasAuthorRef(input: {
+  authorId?: string;
+  authorTwitterId?: string;
+}) {
+  return Boolean(input.authorId || input.authorTwitterId);
+}
+
+function hasTopicRef(input: { topicId?: string; topicSlug?: string }) {
+  return Boolean(input.topicId || input.topicSlug);
 }
 
 async function resolveTopic(input: { topicId?: string; topicSlug?: string }) {
