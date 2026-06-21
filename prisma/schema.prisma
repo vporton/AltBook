@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PublicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Post {
+  id              String              @id @default(cuid())
+  title           String
+  slug            String              @unique
+  body            String
+  authorName      String
+  authorEmailHash String?
+  status          PublicationStatus   @default(PENDING)
+  links           Json                @default("[]")
+  publishedAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  comments        Comment[]
+  decisions       ModerationDecision[]
+
+  @@index([status, publishedAt])
+  @@index([createdAt])
+}
+
+model Comment {
+  id              String              @id @default(cuid())
+  postId          String
+  post            Post                @relation(fields: [postId], references: [id], onDelete: Cascade)
+  body            String
+  authorName      String
+  authorEmailHash String?
+  status          PublicationStatus   @default(PENDING)
+  links           Json                @default("[]")
+  publishedAt     DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  decisions       ModerationDecision[]
+
+  @@index([postId, status, publishedAt])
+  @@index([createdAt])
+}
+
+model ModerationDecision {
+  id          String   @id @default(cuid())
+  contentKind String
+  provider    String
+  model       String
+  outcome     String
+  score       Float?
+  reason      String
+  links       Json     @default("[]")
+  categories  Json     @default("[]")
+  rawResponse Json?
+  postId      String?
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([contentKind, outcome])
+  @@index([postId])
+  @@index([commentId])
+}

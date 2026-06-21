@@ -1,0 +1,4 @@
+interface:
+  display_name: "AltBook"
+  short_description: "Build and maintain the AltBook social publishing app."
+  default_prompt: "Use $altbook-agent when working on AltBook features, moderation, Prisma schema, Fly.io deployment, sitemap generation, or agent handoffs."
