@@ -6,6 +6,7 @@ import {
   rejectComment,
   rejectPost,
 } from "@/app/admin/actions";
+import { authorLabel } from "@/lib/authors";
 import { getAdminSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
@@ -57,6 +58,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       },
       take: 50,
       include: {
+        author: true,
+        topic: true,
         decisions: {
           orderBy: {
             createdAt: "desc",
@@ -74,6 +77,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       },
       take: 50,
       include: {
+        author: true,
         post: {
           select: {
             title: true,
@@ -117,7 +121,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <article className="review-item" key={post.id}>
                 <h3>{post.title}</h3>
                 <p className="meta">
-                  By {post.authorName} · {formatDate(post.createdAt)}
+                  {post.topic.name} · By {authorLabel(post.author)} ·{" "}
+                  {formatDate(post.createdAt)}
                 </p>
                 <div className="body-text small">{post.body}</div>
                 <Decision decision={post.decisions[0]} />
@@ -152,7 +157,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <article className="review-item" key={comment.id}>
                 <h3>On {comment.post.title}</h3>
                 <p className="meta">
-                  By {comment.authorName} · {formatDate(comment.createdAt)}
+                  By {authorLabel(comment.author)} · {formatDate(comment.createdAt)}
                 </p>
                 <div className="body-text small">{comment.body}</div>
                 <Decision decision={comment.decisions[0]} />

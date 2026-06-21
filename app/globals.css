@@ -159,6 +159,7 @@ label {
 }
 
 input,
+select,
 textarea {
   background: #fff;
   border: 1px solid var(--line);
@@ -174,6 +175,7 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(40, 109, 59, 0.14);
@@ -193,6 +195,11 @@ button {
 
 button:hover {
   background: var(--accent-strong);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 button.secondary {
@@ -285,6 +292,7 @@ code {
 }
 
 .post-list,
+.topic-list,
 .review-list,
 .comment-list {
   display: grid;
@@ -346,6 +354,36 @@ code {
   border-radius: 8px;
   color: var(--muted);
   padding: 14px 16px;
+}
+
+.auth-panel {
+  background: #edf1e9;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #374235;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.auth-panel p,
+.status p {
+  margin-bottom: 0;
+}
+
+.button-link {
+  background: var(--accent);
+  border-radius: 8px;
+  color: #fff;
+  display: inline-block;
+  font-weight: 800;
+  padding: 11px 16px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.button-link:hover {
+  background: var(--accent-strong);
 }
 
 .status.success {

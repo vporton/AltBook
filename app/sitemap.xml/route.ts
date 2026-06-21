@@ -13,6 +13,7 @@ export async function GET() {
   const postSitemapCount = Math.ceil(postCount / SITEMAP_URL_LIMIT);
   const sitemapUrls = [
     absoluteUrl("/sitemaps/static.xml"),
+    absoluteUrl("/sitemaps/topics.xml"),
     ...Array.from({ length: postSitemapCount }, (_, index) =>
       absoluteUrl(`/sitemaps/posts/${index}.xml`),
     ),

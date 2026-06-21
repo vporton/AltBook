@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createComment } from "@/app/actions";
+import { authorLabel } from "@/lib/authors";
 import { prisma } from "@/lib/prisma";
+import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +13,7 @@ type PostPageProps = {
     slug: string;
   };
   searchParams?: {
+    auth?: string;
     comment?: string;
     submitted?: string;
   };
@@ -42,20 +46,28 @@ export async function generateMetadata({
 }
 
 export default async function PostPage({ params, searchParams }: PostPageProps) {
-  const post = await prisma.post.findFirst({
-    where: {
-      slug: params.slug,
-      status: "APPROVED",
-    },
-    include: {
-      comments: {
-        where: {
-          status: "APPROVED",
-        },
-        orderBy: [{ publishedAt: "asc" }, { createdAt: "asc" }],
+  const [post, currentAuthor] = await Promise.all([
+    prisma.post.findFirst({
+      where: {
+        slug: params.slug,
+        status: "APPROVED",
       },
-    },
-  });
+      include: {
+        author: true,
+        topic: true,
+        comments: {
+          where: {
+            status: "APPROVED",
+          },
+          orderBy: [{ publishedAt: "asc" }, { createdAt: "asc" }],
+          include: {
+            author: true,
+          },
+        },
+      },
+    }),
+    getCurrentAuthor(),
+  ]);
 
   if (!post) {
     notFound();
@@ -66,10 +78,12 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
   return (
     <main className="content-page">
       <article className="post-full">
-        <p className="eyebrow">Post</p>
+        <p className="eyebrow">
+          <Link href={`/topics/${post.topic.slug}`}>{post.topic.name}</Link>
+        </p>
         <h1>{post.title}</h1>
         <p className="meta">
-          By {post.authorName} · {formatDate(post.publishedAt ?? post.createdAt)}
+          By {authorLabel(post.author)} · {formatDate(post.publishedAt ?? post.createdAt)}
         </p>
         <div className="body-text">{post.body}</div>
       </article>
@@ -77,6 +91,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
       {searchParams?.submitted === "approved" ? (
         <p className="status success">Your post is live.</p>
       ) : null}
+      <AuthStatus value={searchParams?.auth} />
       <CommentStatus value={searchParams?.comment} />
 
       <section className="comments" aria-labelledby="comments-title">
@@ -92,7 +107,8 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
             {post.comments.map((comment) => (
               <article className="comment" key={comment.id}>
                 <p className="meta">
-                  {comment.authorName} · {formatDate(comment.publishedAt ?? comment.createdAt)}
+                  {authorLabel(comment.author)} ·{" "}
+                  {formatDate(comment.publishedAt ?? comment.createdAt)}
                 </p>
                 <div className="body-text small">{comment.body}</div>
               </article>
@@ -103,32 +119,53 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
 
       <section className="comment-form" aria-labelledby="comment-form-title">
         <h2 id="comment-form-title">Add a comment</h2>
-        <form action={createComment} className="form">
-          <input type="hidden" name="postId" value={post.id} />
-          <input type="hidden" name="startedAt" value={startedAt} />
-          <label className="hidden-field">
-            Website
-            <input name="website" tabIndex={-1} autoComplete="off" />
-          </label>
-          <label>
-            Comment
-            <textarea name="body" minLength={3} maxLength={4000} rows={5} required />
-          </label>
-          <div className="field-grid">
-            <label>
-              Name
-              <input name="authorName" minLength={2} maxLength={80} required />
-            </label>
-            <label>
-              Email, private
-              <input name="authorEmail" type="email" />
-            </label>
+        {currentAuthor ? (
+          <>
+            <p className="status success">
+              Signed in as {authorLabel(currentAuthor)}.{" "}
+              <Link href={`/api/auth/logout?next=/posts/${post.slug}`}>Sign out</Link>
+            </p>
+            <form action={createComment} className="form">
+              <input type="hidden" name="postId" value={post.id} />
+              <input type="hidden" name="postSlug" value={post.slug} />
+              <input type="hidden" name="startedAt" value={startedAt} />
+              <label className="hidden-field">
+                Website
+                <input name="website" tabIndex={-1} autoComplete="off" />
+              </label>
+              <label>
+                Comment
+                <textarea name="body" minLength={3} maxLength={4000} rows={5} required />
+              </label>
+              <button type="submit">Submit comment</button>
+            </form>
+          </>
+        ) : (
+          <div className="auth-panel">
+            <p>Register through Twitter before commenting.</p>
+            <Link
+              className="button-link"
+              href={`/api/auth/twitter/start?next=/posts/${post.slug}`}
+            >
+              Register with Twitter
+            </Link>
           </div>
-          <button type="submit">Submit comment</button>
-        </form>
+        )}
       </section>
     </main>
   );
+}
+
+function AuthStatus({ value }: { value?: string }) {
+  if (value === "required") {
+    return <p className="status danger">Register with Twitter before commenting.</p>;
+  }
+
+  if (value === "failed") {
+    return <p className="status danger">Twitter registration failed. Please try again.</p>;
+  }
+
+  return null;
 }
 
 function CommentStatus({ value }: { value?: string }) {

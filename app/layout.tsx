@@ -21,7 +21,7 @@ export default function RootLayout({
             AltBook
           </Link>
           <nav aria-label="Primary navigation">
-            <Link href="/">Posts</Link>
+            <Link href="/">Topics</Link>
             <Link href="/admin">Moderation</Link>
           </nav>
         </header>

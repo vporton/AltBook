@@ -31,7 +31,7 @@ export async function approvePost(formData: FormData) {
   assertAdmin();
   const id = String(formData.get("id") ?? "");
 
-  await prisma.post.update({
+  const post = await prisma.post.update({
     where: { id },
     data: {
       status: PublicationStatus.APPROVED,
@@ -46,10 +46,20 @@ export async function approvePost(formData: FormData) {
         },
       },
     },
+    select: {
+      slug: true,
+      topic: {
+        select: {
+          slug: true,
+        },
+      },
+    },
   });
 
   revalidatePath("/");
   revalidatePath("/admin");
+  revalidatePath(`/topics/${post.topic.slug}`);
+  revalidatePath(`/posts/${post.slug}`);
   revalidatePath("/sitemap.xml");
 }
 
@@ -57,7 +67,7 @@ export async function rejectPost(formData: FormData) {
   assertAdmin();
   const id = String(formData.get("id") ?? "");
 
-  await prisma.post.update({
+  const post = await prisma.post.update({
     where: { id },
     data: {
       status: PublicationStatus.REJECTED,
@@ -71,10 +81,18 @@ export async function rejectPost(formData: FormData) {
         },
       },
     },
+    select: {
+      topic: {
+        select: {
+          slug: true,
+        },
+      },
+    },
   });
 
   revalidatePath("/");
   revalidatePath("/admin");
+  revalidatePath(`/topics/${post.topic.slug}`);
   revalidatePath("/sitemap.xml");
 }
 
@@ -101,6 +119,11 @@ export async function approveComment(formData: FormData) {
       post: {
         select: {
           slug: true,
+          topic: {
+            select: {
+              slug: true,
+            },
+          },
         },
       },
     },
@@ -108,6 +131,7 @@ export async function approveComment(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/posts/${comment.post.slug}`);
+  revalidatePath(`/topics/${comment.post.topic.slug}`);
 }
 
 export async function rejectComment(formData: FormData) {
@@ -132,6 +156,11 @@ export async function rejectComment(formData: FormData) {
       post: {
         select: {
           slug: true,
+          topic: {
+            select: {
+              slug: true,
+            },
+          },
         },
       },
     },
@@ -139,6 +168,7 @@ export async function rejectComment(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/posts/${comment.post.slug}`);
+  revalidatePath(`/topics/${comment.post.topic.slug}`);
 }
 
 function assertAdmin() {

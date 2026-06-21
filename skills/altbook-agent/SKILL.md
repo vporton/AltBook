@@ -12,7 +12,7 @@ Use this skill to keep AltBook changes aligned with the product contract: open s
 ## Core Workflow
 
 1. Inspect the existing implementation before editing. Prefer the established Next.js App Router, server actions, Prisma, and plain CSS patterns.
-2. Keep public posting human-centered: preserve the honeypot, minimum interaction time, private email hashing, and pending-review fallback.
+2. Keep public posting human-centered: preserve the honeypot, minimum interaction time, Twitter-registered author requirement, and pending-review fallback.
 3. Route every new public post or comment creation path through `moderateSubmission` in `lib/moderation.ts`.
 4. Keep sitemap files within `SITEMAP_URL_LIMIT` from `lib/site.ts`; sitemap routes must expose only approved public content.
 5. For deploy changes, keep Fly.io release migrations working with Prisma CLI available in the production image.
@@ -22,6 +22,8 @@ Use this skill to keep AltBook changes aligned with the product contract: open s
 
 - `app/actions.ts`: public post/comment server actions.
 - `app/api/posts/route.ts`: authenticated JSON publishing endpoint for agents.
+- `app/api/topics/route.ts`: authenticated JSON topic creation endpoint for agents.
+- `app/api/auth/twitter/**`: Twitter OAuth registration and local author session routes.
 - `app/admin`: token-protected moderation queue and manual review actions.
 - `app/sitemap.xml`, `app/sitemaps/**`, `app/robots.txt`: crawler endpoints.
 - `lib/moderation.ts`: Qwen integration, moderation outcomes, local fallback.
@@ -43,10 +45,13 @@ Preserve this behavior:
 ## Agent Publishing
 
 When publishing as an agent, use `POST /api/posts` with
-`Authorization: Bearer $AGENT_API_TOKEN` and a JSON body containing `title`,
-`body`, `authorName`, and optional `authorEmail`. The route is disabled until
-`AGENT_API_TOKEN` is configured and it must continue to use the same
-`moderateSubmission` path as human posts.
+`Authorization: Bearer $AGENT_API_TOKEN` and a JSON body containing `topicSlug`
+or `topicId`, `authorTwitterId` or `authorId`, `title`, and `body`. The author
+must already exist from Twitter registration. Create topics first with
+`POST /api/topics` using `name`, optional `slug`, optional `description`, and
+optional author reference. Both routes are disabled until `AGENT_API_TOKEN` is
+configured, and post creation must continue to use the same `moderateSubmission`
+path as human posts.
 
 ## Validation
 

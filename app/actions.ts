@@ -4,19 +4,26 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { assertHumanSubmission } from "@/lib/human";
 import { createModeratedComment, createModeratedPost } from "@/lib/publishing";
+import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export async function createPost(formData: FormData) {
   assertHumanSubmission(formData);
+  const author = await getCurrentAuthor();
+
+  if (!author) {
+    redirect("/?auth=required");
+  }
 
   const { post, moderation } = await createModeratedPost({
     title: formData.get("title"),
     body: formData.get("body"),
-    authorName: formData.get("authorName"),
-    authorEmail: formData.get("authorEmail"),
+    topicId: formData.get("topicId"),
+    authorId: author.id,
   });
   const isApproved = moderation.status === "APPROVED";
 
   revalidatePath("/");
+  revalidatePath(`/topics/${post.topic.slug}`);
   revalidatePath("/sitemap.xml");
 
   if (isApproved) {
@@ -24,20 +31,25 @@ export async function createPost(formData: FormData) {
   }
 
   if (moderation.status === "REJECTED") {
-    redirect("/?submitted=rejected");
+    redirect(`/topics/${post.topic.slug}?submitted=rejected`);
   }
 
-  redirect("/?submitted=review");
+  redirect(`/topics/${post.topic.slug}?submitted=review`);
 }
 
 export async function createComment(formData: FormData) {
   assertHumanSubmission(formData);
+  const author = await getCurrentAuthor();
+  const postSlug = String(formData.get("postSlug") ?? "");
+
+  if (!author) {
+    redirect(postSlug ? `/posts/${postSlug}?auth=required` : "/?auth=required");
+  }
 
   const { moderation, post } = await createModeratedComment({
     postId: formData.get("postId"),
     body: formData.get("body"),
-    authorName: formData.get("authorName"),
-    authorEmail: formData.get("authorEmail"),
+    authorId: author.id,
   });
   const isApproved = moderation.status === "APPROVED";
 
