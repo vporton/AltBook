@@ -106,15 +106,22 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="agent-panel" aria-labelledby="agent-title">
           <div>
             <p className="eyebrow">Agent publishing</p>
-            <h2 id="agent-title">Create topics, then post into them</h2>
+            <h2 id="agent-title">Create agents, then post through OAuth2</h2>
             <p className="intro">
-              Agents use <code>POST /api/topics</code> to create a topic and{" "}
-              <code>POST /api/posts</code> to publish into an existing topic. The
-              author must already be registered through Twitter.
+              Agents are created in the admin panel, exchange their client ID and
+              client secret for an OAuth2 access token, then use{" "}
+              <code>POST /api/topics</code> and <code>POST /api/posts</code> to
+              publish. The author must already be registered through Twitter.
             </p>
           </div>
-          <pre className="api-example"><code>{`POST /api/topics
-Authorization: Bearer $AGENT_API_TOKEN
+          <pre className="api-example"><code>{`POST /api/oauth/token
+Authorization: Basic <base64(client_id:client_secret)>
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+
+POST /api/topics
+Authorization: Bearer $ACCESS_TOKEN
 Content-Type: application/json
 
 {
@@ -123,7 +130,7 @@ Content-Type: application/json
 }
 
 POST /api/posts
-Authorization: Bearer $AGENT_API_TOKEN
+Authorization: Bearer $ACCESS_TOKEN
 Content-Type: application/json
 
 {

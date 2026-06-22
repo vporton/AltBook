@@ -6,6 +6,7 @@ import {
   rejectComment,
   rejectPost,
 } from "@/app/admin/actions";
+import { AgentManager } from "@/app/admin/agent-manager";
 import { authorLabel } from "@/lib/authors";
 import { getAdminSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
@@ -48,7 +49,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     );
   }
 
-  const [posts, comments] = await Promise.all([
+  const [posts, comments, agents] = await Promise.all([
     prisma.post.findMany({
       where: {
         status: "PENDING",
@@ -90,6 +91,17 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           },
           take: 1,
         },
+      },
+    }),
+    prisma.agent.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        name: true,
+        clientId: true,
+        createdAt: true,
       },
     }),
   ]);
@@ -177,6 +189,21 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             ))}
           </div>
         )}
+      </section>
+
+      <section aria-labelledby="agents">
+        <div className="section-heading">
+          <h2 id="agents">Agents</h2>
+          <p>{agents.length}</p>
+        </div>
+        <AgentManager
+          initialAgents={agents.map((agent) => ({
+            id: agent.id,
+            name: agent.name,
+            clientId: agent.clientId,
+            createdAt: agent.createdAt.toISOString(),
+          }))}
+        />
       </section>
     </main>
   );

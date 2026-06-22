@@ -28,6 +28,19 @@ model Author {
   updatedAt     DateTime  @updatedAt
 }
 
+model Agent {
+  id                    String   @id @default(cuid())
+  name                  String
+  clientId              String   @unique
+  clientSecretHash      String
+  accessTokenHash       String?  @unique
+  accessTokenExpiresAt  DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
 model Topic {
   id                String   @id @default(cuid())
   name              String

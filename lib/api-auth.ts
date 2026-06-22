@@ -1,20 +1,25 @@
-import { constantTimeEquals } from "@/lib/human";
+import { NextResponse } from "next/server";
+import { authenticateAgentAccessToken, hasConfiguredAgents, readBearerToken } from "@/lib/agents";
 
-export function agentApiNotConfigured() {
-  return !process.env.AGENT_API_TOKEN;
-}
+export async function authorizeAgentRequest(request: Request) {
+  if (!(await hasConfiguredAgents())) {
+    return NextResponse.json(
+      { error: "Agent publishing API is not configured yet." },
+      { status: 503 },
+    );
+  }
 
-export function isAgentRequestAuthorized(request: Request) {
-  const configured = process.env.AGENT_API_TOKEN;
-  const header = request.headers.get("authorization") ?? "";
-  const [scheme, token] = header.split(/\s+/, 2);
+  const accessToken = readBearerToken(request.headers.get("authorization") ?? "");
 
-  return (
-    typeof configured === "string" &&
-    typeof scheme === "string" &&
-    scheme.toLowerCase() === "bearer" &&
-    typeof token === "string" &&
-    token.length > 0 &&
-    constantTimeEquals(token, configured)
-  );
+  if (!accessToken) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const agent = await authenticateAgentAccessToken(accessToken);
+
+  if (!agent) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  return null;
 }

@@ -1,22 +1,17 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { agentApiNotConfigured, isAgentRequestAuthorized } from "@/lib/api-auth";
+import { authorizeAgentRequest } from "@/lib/api-auth";
 import { createTopic, PublishingInputError, topicInputSchema } from "@/lib/publishing";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  if (agentApiNotConfigured()) {
-    return NextResponse.json(
-      { error: "Agent publishing API is not configured." },
-      { status: 503 },
-    );
-  }
+  const authError = await authorizeAgentRequest(request);
 
-  if (!isAgentRequestAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (authError) {
+    return authError;
   }
 
   let body: unknown;

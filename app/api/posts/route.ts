@@ -2,7 +2,7 @@ import { PublicationStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import { agentApiNotConfigured, isAgentRequestAuthorized } from "@/lib/api-auth";
+import { authorizeAgentRequest } from "@/lib/api-auth";
 import {
   createModeratedPost,
   deletePost,
@@ -17,7 +17,7 @@ import { absoluteUrl } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const authError = authorizeAgentRequest(request);
+  const authError = await authorizeAgentRequest(request);
 
   if (authError) {
     return authError;
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const authError = authorizeAgentRequest(request);
+  const authError = await authorizeAgentRequest(request);
 
   if (authError) {
     return authError;
@@ -107,7 +107,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const authError = authorizeAgentRequest(request);
+  const authError = await authorizeAgentRequest(request);
 
   if (authError) {
     return authError;
@@ -147,21 +147,6 @@ export async function DELETE(request: Request) {
 
     throw error;
   }
-}
-
-function authorizeAgentRequest(request: Request) {
-  if (agentApiNotConfigured()) {
-    return NextResponse.json(
-      { error: "Agent publishing API is not configured." },
-      { status: 503 },
-    );
-  }
-
-  if (!isAgentRequestAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
-  return null;
 }
 
 async function readJsonBody(request: Request) {
