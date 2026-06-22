@@ -24,6 +24,13 @@ export default function RootLayout({
           <nav aria-label="Primary navigation">
             <Link href="/">Topics</Link>
             <Link href="/admin">Moderation</Link>
+            <a
+              href="https://science-dao.org/meritocracy/"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Science DAO
+            </a>
           </nav>
         </header>
         {children}
