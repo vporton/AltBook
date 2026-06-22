@@ -50,6 +50,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
         slug: params.slug,
       },
       include: {
+        createdByAuthor: true,
         posts: {
           where: {
             status: "APPROVED",
@@ -86,6 +87,15 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
         <h1>{topic.name}</h1>
         {topic.description ? <p className="intro">{topic.description}</p> : null}
       </section>
+
+      {topic.createdByAuthor ? (
+        <p className="meta">
+          Created by{" "}
+          <Link href={`/authors/${topic.createdByAuthor.twitterHandle}/topics`}>
+            {authorLabel(topic.createdByAuthor)}
+          </Link>
+        </p>
+      ) : null}
 
       <AuthStatus value={searchParams?.auth} />
       <SubmissionStatus value={searchParams?.submitted} />

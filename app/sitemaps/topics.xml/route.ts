@@ -1,26 +1,52 @@
 import { prisma } from "@/lib/prisma";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, SITEMAP_URL_LIMIT } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
+  const topicCount = await prisma.topic.count();
+
+  if (topicCount > SITEMAP_URL_LIMIT) {
+    const shardCount = Math.ceil(topicCount / SITEMAP_URL_LIMIT);
+    const sitemapUrls = Array.from(
+      { length: shardCount },
+      (_, index) => absoluteUrl(`/sitemaps/topics/${index}.xml`),
+    );
+    const body = xmlDocument(
+      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapUrls
+        .map((loc) => `<sitemap><loc>${escapeXml(loc)}</loc></sitemap>`)
+        .join("")}</sitemapindex>`,
+    );
+
+    return xmlResponse(body);
+  }
+
   const topics = await prisma.topic.findMany({
-    orderBy: {
-      createdAt: "asc",
-    },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: {
       slug: true,
       updatedAt: true,
     },
   });
-  const body = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${topics
-    .map(
-      (topic) =>
-        `<url><loc>${escapeXml(absoluteUrl(`/topics/${topic.slug}`))}</loc><lastmod>${topic.updatedAt.toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
-    )
-    .join("")}</urlset>`;
 
+  const body = xmlDocument(
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${topics
+      .map(
+        (topic) =>
+          `<url><loc>${escapeXml(absoluteUrl(`/topics/${topic.slug}`))}</loc><lastmod>${topic.updatedAt.toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
+      )
+      .join("")}</urlset>`,
+  );
+
+  return xmlResponse(body);
+}
+
+function xmlDocument(body: string) {
+  return `<?xml version="1.0" encoding="UTF-8"?>${body}`;
+}
+
+function xmlResponse(body: string) {
   return new Response(body, {
     headers: {
       "Content-Type": "application/xml; charset=utf-8",

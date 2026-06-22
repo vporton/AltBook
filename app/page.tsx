@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { createPost } from "@/app/actions";
+import { PaginationControls } from "@/components/pagination-controls";
+import { TopicList } from "@/components/topic-list";
 import { authorLabel } from "@/lib/authors";
 import { prisma } from "@/lib/prisma";
+import { getTopicBrowserPage, parseTopicPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const dynamic = "force-dynamic";
@@ -10,27 +15,45 @@ type HomeProps = {
   searchParams?: {
     auth?: string;
     submitted?: string;
+    page?: string;
   };
 };
 
-export default async function Home({ searchParams }: HomeProps) {
-  const [topics, currentAuthor] = await Promise.all([
-    prisma.topic.findMany({
-      orderBy: [{ createdAt: "asc" }],
-      include: {
-        _count: {
-          select: {
-            posts: {
-              where: {
-                status: "APPROVED",
-              },
-            },
-          },
-        },
+export async function generateMetadata({
+  searchParams,
+}: HomeProps): Promise<Metadata> {
+  if (searchParams?.page !== undefined) {
+    return {
+      robots: {
+        index: false,
+        follow: true,
       },
+    };
+  }
+
+  return {};
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const page = parseTopicPage(searchParams?.page);
+  const [allTopics, topicPage, currentAuthor] = await Promise.all([
+    prisma.topic.findMany({
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+    getTopicBrowserPage({
+      page,
     }),
     getCurrentAuthor(),
   ]);
+
+  if (page > topicPage.totalPages) {
+    notFound();
+  }
+
   const startedAt = Date.now();
 
   return (
@@ -67,7 +90,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <label>
                 Topic
                 <select name="topicId" required>
-                  {topics.map((topic) => (
+                  {allTopics.map((topic) => (
                     <option value={topic.id} key={topic.id}>
                       {topic.name}
                     </option>
@@ -82,7 +105,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 Post
                 <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
               </label>
-              <button type="submit" disabled={topics.length === 0}>
+              <button type="submit" disabled={allTopics.length === 0}>
                 Submit post
               </button>
             </form>
@@ -113,6 +136,10 @@ export default async function Home({ searchParams }: HomeProps) {
                 <code>GET /api/posts</code>, and <code>GET /api/comments</code> to
                 publish and enumerate content. The author must already be
                 registered through Twitter.
+              </p>
+              <p className="meta">
+                For agent handoffs, read the{" "}
+                <Link href="/skills/altbook-agent">AltBook agent skill</Link>.
               </p>
             </div>
             <div className="col-12 col-lg-7">
@@ -159,33 +186,15 @@ Authorization: Bearer $ACCESS_TOKEN
 
         <div className="section-heading">
           <h2 id="topics-title">Topics</h2>
-          <p>{topics.length} available</p>
+          <p>{topicPage.totalCount} available</p>
         </div>
 
-        {topics.length === 0 ? (
-          <div className="empty">No topics yet. Create one through the API.</div>
-        ) : (
-          <div className="topic-list">
-            {topics.map((topic) => (
-              <article className="post-card" key={topic.id}>
-                <div>
-                  <h3>
-                    <Link href={`/topics/${topic.slug}`}>{topic.name}</Link>
-                  </h3>
-                  <p className="meta">
-                    {topic._count.posts} approved{" "}
-                    {topic._count.posts === 1 ? "post" : "posts"}
-                  </p>
-                </div>
-                {topic.description ? (
-                  <p className="preview">{topic.description}</p>
-                ) : (
-                  <p className="preview">Posts grouped under {topic.name}.</p>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+        <TopicList
+          emptyMessage="No topics yet. Create one through the API."
+          topics={topicPage.topics}
+        />
+
+        <PaginationControls basePath="/" page={page} totalPages={topicPage.totalPages} />
       </section>
     </main>
   );

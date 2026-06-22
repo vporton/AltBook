@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { authorizeAgentRequest } from "@/lib/api-auth";
 import { createTopic, PublishingInputError, topicInputSchema } from "@/lib/publishing";
+import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,21 @@ export async function POST(request: Request) {
     revalidatePath("/");
     revalidatePath(`/topics/${topic.slug}`);
     revalidatePath("/sitemap.xml");
+
+    if (topic.createdByAuthorId) {
+      const createdByAuthor = await prisma.author.findUnique({
+        where: {
+          id: topic.createdByAuthorId,
+        },
+        select: {
+          twitterHandle: true,
+        },
+      });
+
+      if (createdByAuthor) {
+        revalidatePath(`/authors/${createdByAuthor.twitterHandle}/topics`);
+      }
+    }
 
     return NextResponse.json(
       {

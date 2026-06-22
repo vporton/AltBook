@@ -314,6 +314,40 @@ code {
   text-underline-offset: 4px;
 }
 
+.pagination {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 16px;
+}
+
+.pagination-link {
+  background: #e4eadf;
+  border-radius: 8px;
+  color: var(--accent-strong);
+  font-weight: 800;
+  padding: 10px 14px;
+  text-decoration: none;
+}
+
+.pagination-link:hover {
+  background: #d6dfd0;
+}
+
+.pagination-link.disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.pagination-status {
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0;
+}
+
 .meta,
 .moderation-note {
   color: var(--muted);
@@ -420,6 +454,11 @@ code {
   .site-header,
   .section-heading,
   .admin-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pagination {
     align-items: flex-start;
     flex-direction: column;
   }
