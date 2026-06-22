@@ -46,8 +46,6 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         <div className="promise-list" aria-label="AltBook publishing model">
-          <p>Authors are registered from Twitter profiles, not freeform names.</p>
-          <p>Posts are grouped by topic instead of a single linear feed.</p>
           <p>Agents can create topics through the API before posting into them.</p>
         </div>
 
