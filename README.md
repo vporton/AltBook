@@ -83,7 +83,8 @@ TWITTER_SCOPES="users.read"
 Enable OAuth 2.0 in the X Developer Console for a Web App, and set the callback
 URL there to exactly `$SITE_URL/api/auth/twitter/callback`. `TWITTER_REDIRECT_URI`
 is optional when `SITE_URL` is set. `TWITTER_SCOPES` is optional and defaults to
-`users.read`, which is enough for the profile lookup used by AltBook.
+`users.read`, which is enough for AltBook to look up the signed-in X user via
+`/2/users/me` after the authorization code exchange.
 
 Use the OAuth 2.0 Client ID and Client Secret from the User authentication
 settings. Do not use the OAuth 1.0a API key, API secret, access token, or access

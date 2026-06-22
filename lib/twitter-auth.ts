@@ -12,11 +12,31 @@ const AUTHOR_SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const OAUTH_COOKIE_MAX_AGE = 60 * 10;
 const TWITTER_AUTHORIZE_URL = "https://x.com/i/oauth2/authorize";
 const TWITTER_TOKEN_URL = "https://api.x.com/2/oauth2/token";
-const TWITTER_ME_URLS = [
-  "https://api.x.com/2/users/me?user.fields=profile_image_url",
-  "https://api.twitter.com/2/users/me?user.fields=profile_image_url",
-];
 const TWITTER_DEFAULT_SCOPE = "users.read";
+const TWITTER_ALLOWED_SCOPES = new Set([
+  "tweet.read",
+  "tweet.write",
+  "tweet.moderate.write",
+  "users.email",
+  "users.read",
+  "follows.read",
+  "follows.write",
+  "offline.access",
+  "space.read",
+  "mute.read",
+  "mute.write",
+  "like.read",
+  "like.write",
+  "list.read",
+  "list.write",
+  "block.read",
+  "block.write",
+  "bookmark.read",
+  "bookmark.write",
+  "dm.read",
+  "dm.write",
+  "media.write",
+]);
 
 type TwitterConfig = {
   clientId: string;
@@ -30,7 +50,7 @@ type TwitterTokenResponse = {
   error_description?: string;
 };
 
-type TwitterMeResponse = {
+type TwitterUserMeResponse = {
   data?: {
     id?: string;
     name?: string;
@@ -77,7 +97,7 @@ export function createTwitterAuthorizationUrl(config: TwitterConfig, state: stri
     response_type: "code",
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
-    scope: envValue("TWITTER_SCOPES") ?? TWITTER_DEFAULT_SCOPE,
+    scope: twitterScopes(),
     state,
     code_challenge: codeChallenge(verifier),
     code_challenge_method: "S256",
@@ -97,14 +117,14 @@ export async function registerTwitterAuthorFromCode(
   const token = await exchangeCodeForToken(config, code, verifier);
   const profile = await fetchTwitterProfile(token);
 
-  if (!profile.data?.id || !profile.data.username || !profile.data.name) {
-    throw new Error("Twitter did not return a complete user profile.");
+  if (!profile.data?.id || !profile.data?.username) {
+    throw new Error("X did not return a valid user profile payload.");
   }
 
   return registerTwitterAuthor({
     twitterId: profile.data.id,
     twitterHandle: profile.data.username,
-    displayName: profile.data.name,
+    displayName: profile.data.name ?? profile.data.username,
     avatarUrl: profile.data.profile_image_url ?? "",
   });
 }
@@ -242,32 +262,36 @@ async function exchangeCodeForToken(
 }
 
 async function fetchTwitterProfile(accessToken: string) {
-  const failures: Array<{ url: string; status: number; body: string }> = [];
+  const response = await fetch("https://api.x.com/2/users/me?user.fields=profile_image_url", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: "no-store",
+  });
 
-  for (const url of TWITTER_ME_URLS) {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: "no-store",
-    });
+  const payload = (await response.json()) as TwitterUserMeResponse & {
+    error?: string;
+    title?: string;
+    detail?: string;
+  };
 
-    if (response.ok) {
-      return (await response.json()) as TwitterMeResponse;
-    }
-
-    failures.push({
-      url,
-      status: response.status,
-      body: await response.text(),
-    });
+  if (!response.ok) {
+    throw new Error(payload.detail ?? payload.title ?? payload.error ?? "X profile lookup failed.");
   }
 
-  const detail = failures
-    .map(({ url, status, body }) => `${url} returned ${status}: ${body}`)
-    .join(" | ");
+  return payload;
+}
 
-  throw new Error(`Twitter profile lookup failed. ${detail}`);
+function twitterScopes() {
+  const configured = envValue("TWITTER_SCOPES") ?? TWITTER_DEFAULT_SCOPE;
+  const scopes = new Set(
+    configured.split(/\s+/).filter((scope) => scope && TWITTER_ALLOWED_SCOPES.has(scope)),
+  );
+
+  scopes.add("users.read");
+
+  return Array.from(scopes).join(" ");
 }
 
 function twitterRedirectUri(request: Request) {
