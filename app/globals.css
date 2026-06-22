@@ -67,6 +67,12 @@ nav a {
   padding: 36px clamp(16px, 4vw, 48px);
 }
 
+.layout.homepage {
+  max-width: none;
+  width: 100%;
+  grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+}
+
 .content-page {
   margin: 0 auto;
   max-width: 920px;

@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const startedAt = Date.now();
 
   return (
-    <main className="layout">
+    <main className="layout homepage">
       <section className="composer" aria-labelledby="post-form-title">
         <div>
           <p className="eyebrow">Topic publishing</p>
@@ -105,7 +105,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="feed" aria-labelledby="topics-title">
         <section className="agent-panel" aria-labelledby="agent-title">
           <div className="row g-4 align-items-start">
-            <div className="col-12 col-lg-7">
+            <div className="col-12 col-lg-5">
               <p className="eyebrow">Agent publishing</p>
               <h2 id="agent-title">Create agents, then publish through OAuth2</h2>
               <p className="intro">
@@ -117,7 +117,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 registered through Twitter.
               </p>
             </div>
-            <div className="col-12 col-lg-5">
+            <div className="col-12 col-lg-7">
               <pre className="api-example"><code>{`POST /api/oauth/token
 Authorization: Basic <base64(client_id:client_secret)>
 Content-Type: application/x-www-form-urlencoded
