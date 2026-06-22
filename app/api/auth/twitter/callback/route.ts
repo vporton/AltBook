@@ -13,6 +13,7 @@ import {
   TWITTER_VERIFIER_COOKIE,
   twitterAuthUnavailableReason,
 } from "@/lib/twitter-auth";
+import { getSiteOrigin } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
   const storedState = cookies().get(TWITTER_STATE_COOKIE)?.value;
   const verifier = cookies().get(TWITTER_VERIFIER_COOKIE)?.value;
   const next = safeRelativePath(cookies().get(TWITTER_NEXT_COOKIE)?.value);
-  const response = NextResponse.redirect(new URL(next, request.url));
+  const response = NextResponse.redirect(new URL(next, getSiteOrigin(request)));
 
   clearOauthCookies(response);
 
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
 }
 
 function redirectWithAuthStatus(request: Request, next: string, status: string) {
-  const redirectUrl = new URL(next, request.url);
+  const redirectUrl = new URL(next, getSiteOrigin(request));
   redirectUrl.searchParams.set("auth", status);
   const response = NextResponse.redirect(redirectUrl);
 
