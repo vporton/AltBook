@@ -228,9 +228,6 @@ button.secondary {
 }
 
 .agent-panel {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
   margin-bottom: 16px;
   padding: 20px;
 }
@@ -408,8 +405,7 @@ code {
 }
 
 @media (max-width: 840px) {
-  .layout,
-  .agent-panel {
+  .layout {
     grid-template-columns: 1fr;
   }
 }
