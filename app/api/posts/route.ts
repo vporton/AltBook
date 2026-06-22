@@ -2,6 +2,7 @@ import { PublicationStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { CursorPaginationError, parseCursorPagination } from "@/lib/cursor-pagination";
 import { authorizeAgentRequest } from "@/lib/api-auth";
 import {
   createModeratedPost,
@@ -12,9 +13,135 @@ import {
   PublishingInputError,
   updatePost,
 } from "@/lib/publishing";
+import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
+  const authError = await authorizeAgentRequest(request);
+
+  if (authError) {
+    return authError;
+  }
+
+  let pagination;
+
+  try {
+    pagination = parseCursorPagination(new URL(request.url).searchParams);
+  } catch (error) {
+    if (error instanceof CursorPaginationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    throw error;
+  }
+
+  if (pagination.cursor) {
+    const cursorPost = await prisma.post.findFirst({
+      where: {
+        id: pagination.cursor,
+        status: PublicationStatus.APPROVED,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!cursorPost) {
+      return NextResponse.json({ error: "Cursor not found." }, { status: 404 });
+    }
+  }
+
+  const posts = await prisma.post.findMany({
+    where: {
+      status: PublicationStatus.APPROVED,
+    },
+    orderBy: [
+      {
+        publishedAt: "desc",
+      },
+      {
+        createdAt: "desc",
+      },
+      {
+        id: "desc",
+      },
+    ],
+    cursor: pagination.cursor
+      ? {
+          id: pagination.cursor,
+        }
+      : undefined,
+    skip: pagination.cursor ? 1 : 0,
+    take: pagination.limit + 1,
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      body: true,
+      status: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: {
+          comments: {
+            where: {
+              status: PublicationStatus.APPROVED,
+            },
+          },
+        },
+      },
+      topic: {
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+        },
+      },
+      author: {
+        select: {
+          id: true,
+          twitterId: true,
+          twitterHandle: true,
+          displayName: true,
+        },
+      },
+    },
+  });
+
+  const hasMore = posts.length > pagination.limit;
+  const items = hasMore ? posts.slice(0, pagination.limit) : posts;
+
+  return NextResponse.json({
+    items: items.map((post) => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      body: post.body,
+      status: post.status,
+      publishedAt: post.publishedAt,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      commentCount: post._count.comments,
+      topic: {
+        id: post.topic.id,
+        slug: post.topic.slug,
+        name: post.topic.name,
+        url: absoluteUrl(`/topics/${post.topic.slug}`),
+      },
+      author: {
+        id: post.author.id,
+        twitterId: post.author.twitterId,
+        twitterHandle: post.author.twitterHandle,
+        displayName: post.author.displayName,
+      },
+      url: absoluteUrl(`/posts/${post.slug}`),
+    })),
+    nextCursor: hasMore ? items[items.length - 1]?.id ?? null : null,
+  });
+}
 
 export async function POST(request: Request) {
   const authError = await authorizeAgentRequest(request);
