@@ -12,8 +12,10 @@ const AUTHOR_SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const OAUTH_COOKIE_MAX_AGE = 60 * 10;
 const TWITTER_AUTHORIZE_URL = "https://x.com/i/oauth2/authorize";
 const TWITTER_TOKEN_URL = "https://api.x.com/2/oauth2/token";
-const TWITTER_ME_URL =
-  "https://api.x.com/2/users/me?user.fields=profile_image_url";
+const TWITTER_ME_URLS = [
+  "https://api.x.com/2/users/me?user.fields=profile_image_url",
+  "https://api.twitter.com/2/users/me?user.fields=profile_image_url",
+];
 const TWITTER_DEFAULT_SCOPE = "users.read";
 
 type TwitterConfig = {
@@ -240,18 +242,32 @@ async function exchangeCodeForToken(
 }
 
 async function fetchTwitterProfile(accessToken: string) {
-  const response = await fetch(TWITTER_ME_URL, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    cache: "no-store",
-  });
+  const failures: Array<{ url: string; status: number; body: string }> = [];
 
-  if (!response.ok) {
-    throw new Error("Twitter profile lookup failed.");
+  for (const url of TWITTER_ME_URLS) {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (response.ok) {
+      return (await response.json()) as TwitterMeResponse;
+    }
+
+    failures.push({
+      url,
+      status: response.status,
+      body: await response.text(),
+    });
   }
 
-  return (await response.json()) as TwitterMeResponse;
+  const detail = failures
+    .map(({ url, status, body }) => `${url} returned ${status}: ${body}`)
+    .join(" | ");
+
+  throw new Error(`Twitter profile lookup failed. ${detail}`);
 }
 
 function twitterRedirectUri(request: Request) {
