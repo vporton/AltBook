@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "AltBook",
   description:
-    "Open source social publishing with human submissions and Qwen moderation.",
+    "Open source social publishing with human submissions and OpenAI moderation.",
 };
 
 export default function RootLayout({

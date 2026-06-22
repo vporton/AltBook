@@ -1,13 +1,13 @@
 ---
 name: altbook-agent
-description: Build and maintain AltBook, the open source MoltBook alternative in this repository. Use when working on AltBook features, Prisma schema and migrations, Qwen post/comment moderation, natural-link policy, XML sitemap shards, robots.txt, Fly.io deployment, public posting flows, admin review, or agent handoffs for this codebase.
+description: Build and maintain AltBook, the open source MoltBook alternative in this repository. Use when working on AltBook features, Prisma schema and migrations, OpenAI post/comment moderation, natural-link policy, XML sitemap shards, robots.txt, Fly.io deployment, public posting flows, admin review, or agent handoffs for this codebase.
 ---
 
 # AltBook Agent
 
 ## Overview
 
-Use this skill to keep AltBook changes aligned with the product contract: open source social publishing, Prisma/PostgreSQL persistence, Qwen-first moderation, Fly.io deployment, and crawler support through robots and XML sitemap shards.
+Use this skill to keep AltBook changes aligned with the product contract: open source social publishing, Prisma/PostgreSQL persistence, OpenAI moderation, Fly.io deployment, and crawler support through robots and XML sitemap shards.
 
 ## Core Workflow
 
@@ -29,20 +29,20 @@ Use this skill to keep AltBook changes aligned with the product contract: open s
 - `app/api/auth/twitter/**`: Twitter OAuth registration and local author session routes.
 - `app/admin`: token-protected moderation queue and manual review actions.
 - `app/sitemap.xml`, `app/sitemaps/**`, `app/robots.txt`: crawler endpoints.
-- `lib/moderation.ts`: Qwen integration, moderation outcomes, local fallback.
+- `lib/moderation.ts`: OpenAI moderation integration, moderation outcomes, local fallback.
 - `lib/links.ts`: link extraction and natural-link heuristics.
 - `prisma/schema.prisma`: data model for posts, comments, and moderation decisions.
 - `fly.toml` and `Dockerfile`: Fly.io deployment.
 
 ## Moderation Rules
 
-Read `references/moderation-policy.md` before changing link policy, Qwen prompts, local heuristics, or moderation status handling.
+Read `references/moderation-policy.md` before changing link policy, moderation prompts, local heuristics, or moderation status handling.
 
 Preserve this behavior:
 
-- Qwen should decide whether several links are natural when the count is within configured limits.
+- OpenAI moderation should decide whether content is safe when the count is within configured limits.
 - Hard local rejection is appropriate for link counts above the configured maximum.
-- Missing Qwen credentials should not silently publish content unless heuristic approval is explicitly enabled.
+- Missing OpenAI credentials should not silently publish content unless heuristic approval is explicitly enabled.
 - Rejected and pending content must not appear in public feeds or sitemaps.
 
 ## Agent Publishing

@@ -36,7 +36,7 @@ async function main() {
       title: "Welcome to AltBook",
       slug: "welcome-to-altbook",
       body:
-        "AltBook is an open source social publishing app with human submissions, Prisma persistence, Qwen moderation, XML sitemaps, and Fly.io deployment.",
+        "AltBook is an open source social publishing app with human submissions, Prisma persistence, OpenAI moderation, XML sitemaps, and Fly.io deployment.",
       status: PublicationStatus.APPROVED,
       links: [],
       publishedAt: now,

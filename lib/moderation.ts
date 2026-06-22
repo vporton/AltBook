@@ -2,6 +2,7 @@ import { PublicationStatus } from "@prisma/client";
 import { assessLinks, type LinkAssessment } from "@/lib/links";
 
 type ModerationKind = "post" | "comment";
+type ModerationProvider = "openai" | "heuristic";
 
 export type ModerationInput = {
   kind: ModerationKind;
@@ -16,17 +17,23 @@ export type ModerationResult = {
   reason: string;
   categories: string[];
   links: LinkAssessment;
-  provider: "qwen" | "heuristic";
+  provider: ModerationProvider;
   model: string;
   rawResponse: unknown;
 };
 
-type QwenJson = {
-  outcome?: string;
-  score?: number;
-  reason?: string;
-  categories?: string[];
+type OpenAIModerationResponse = {
+  id?: string;
+  model?: string;
+  results?: Array<{
+    flagged?: boolean;
+    categories?: Record<string, boolean>;
+    category_scores?: Record<string, number>;
+  }>;
 };
+
+const OPENAI_MODERATION_MODEL = "omni-moderation-latest";
+const OPENAI_MODERATION_URL = "https://api.openai.com/v1/moderations";
 
 export async function moderateSubmission(
   input: ModerationInput,
@@ -50,20 +57,20 @@ export async function moderateSubmission(
     });
   }
 
-  const apiKey = process.env.QWEN_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    return fallbackWithoutQwen(input, linkAssessment);
+    return fallbackWithoutOpenAI(input, linkAssessment);
   }
 
   try {
-    const qwen = await callQwen(input, linkAssessment, apiKey);
+    const openaiModeration = await callOpenAIModeration(input, apiKey);
     return resultFromOutcome({
-      ...qwen,
+      ...openaiModeration,
       links: linkAssessment,
-      provider: "qwen",
-      model: process.env.QWEN_MODEL || "qwen-plus",
-      rawResponse: qwen.rawResponse,
+      provider: "openai",
+      model: openaiModeration.model,
+      rawResponse: openaiModeration.rawResponse,
     });
   } catch (error) {
     return resultFromOutcome({
@@ -71,18 +78,18 @@ export async function moderateSubmission(
       score: null,
       reason:
         error instanceof Error
-          ? `Qwen moderation failed: ${error.message}`
-          : "Qwen moderation failed.",
+          ? `OpenAI moderation failed: ${error.message}`
+          : "OpenAI moderation failed.",
       categories: ["moderation_unavailable"],
       links: linkAssessment,
-      provider: "qwen",
-      model: process.env.QWEN_MODEL || "qwen-plus",
+      provider: "openai",
+      model: OPENAI_MODERATION_MODEL,
       rawResponse: null,
     });
   }
 }
 
-function fallbackWithoutQwen(
+function fallbackWithoutOpenAI(
   input: ModerationInput,
   links: LinkAssessment,
 ): ModerationResult {
@@ -94,7 +101,7 @@ function fallbackWithoutQwen(
       outcome: "NEEDS_REVIEW",
       score: 0.55,
       reason:
-        "Qwen is not configured and the local link assessment found promotional link patterns.",
+        "OpenAI moderation is not configured and the local link assessment found promotional link patterns.",
       categories: ["needs_manual_moderation"],
       links,
       provider: "heuristic",
@@ -107,7 +114,7 @@ function fallbackWithoutQwen(
     return resultFromOutcome({
       outcome: "APPROVED",
       score: 0.15,
-      reason: "Qwen is not configured; local heuristic approval is enabled.",
+      reason: "OpenAI moderation is not configured; local heuristic approval is enabled.",
       categories: [],
       links,
       provider: "heuristic",
@@ -119,7 +126,7 @@ function fallbackWithoutQwen(
   return resultFromOutcome({
     outcome: "NEEDS_REVIEW",
     score: null,
-    reason: "Qwen moderation is not configured, so the submission needs manual review.",
+    reason: "OpenAI moderation is not configured, so the submission needs manual review.",
     categories: ["moderation_unavailable"],
     links,
     provider: "heuristic",
@@ -128,102 +135,148 @@ function fallbackWithoutQwen(
   });
 }
 
-async function callQwen(
+async function callOpenAIModeration(
   input: ModerationInput,
-  links: LinkAssessment,
   apiKey: string,
-): Promise<Omit<ModerationResult, "status" | "links" | "provider" | "model">> {
-  const base = (process.env.QWEN_API_BASE || "https://dashscope.aliyuncs.com/compatible-mode/v1").replace(
-    /\/+$/,
-    "",
-  );
-  const model = process.env.QWEN_MODEL || "qwen-plus";
-  const response = await fetch(`${base}/chat/completions`, {
+): Promise<{
+  outcome: "APPROVED" | "REJECTED";
+  score: number | null;
+  reason: string;
+  categories: string[];
+  model: string;
+  rawResponse: OpenAIModerationResponse;
+}> {
+  const response = await fetch(OPENAI_MODERATION_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
-      temperature: 0,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "You moderate a public social publishing app. Return only JSON with outcome, score, reason, and categories. outcome must be APPROVED, REJECTED, or NEEDS_REVIEW. Approve natural writing that includes several relevant links. Reject spam, scams, harassment, sexual exploitation, illegal instructions, malware, and link stuffing.",
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            contentKind: input.kind,
-            title: input.title ?? null,
-            body: input.body,
-            linkAssessment: links,
-            policy:
-              "Links are allowed when they are relevant, contextual, and not repetitive. Several links in a long post are acceptable.",
-          }),
-        },
-      ],
+      model: OPENAI_MODERATION_MODEL,
+      input: buildModerationInput(input),
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Qwen API returned ${response.status}`);
+    throw new Error(
+      `OpenAI moderation API returned ${response.status}${await readResponseError(
+        response,
+      )}`,
+    );
   }
 
-  const raw = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = raw.choices?.[0]?.message?.content;
+  const raw = (await response.json()) as OpenAIModerationResponse;
+  const result = raw.results?.[0];
 
-  if (!content) {
-    throw new Error("Qwen response had no content");
+  if (!result) {
+    throw new Error("OpenAI moderation response had no results");
   }
 
-  const parsed = parseJsonObject(content);
-  const normalized = normalizeQwenJson(parsed);
+  const normalized = normalizeOpenAIModerationResult(result);
 
   return {
-    outcome: normalized.outcome,
-    score: normalized.score,
-    reason: normalized.reason,
-    categories: normalized.categories,
+    ...normalized,
+    model: raw.model || OPENAI_MODERATION_MODEL,
     rawResponse: raw,
   };
 }
 
-function parseJsonObject(content: string): QwenJson {
+function buildModerationInput(input: ModerationInput) {
+  if (input.title) {
+    return `Title: ${input.title}\n\nBody: ${input.body}`;
+  }
+
+  return input.body;
+}
+
+async function readResponseError(response: Response) {
+  const text = await response.text();
+
+  if (!text) {
+    return "";
+  }
+
   try {
-    return JSON.parse(content) as QwenJson;
+    const parsed = JSON.parse(text) as {
+      error?: {
+        message?: string;
+      };
+      message?: string;
+    };
+    const message = parsed.error?.message || parsed.message;
+
+    return message ? `: ${message}` : "";
   } catch {
-    const match = content.match(/\{[\s\S]*\}/);
-
-    if (!match) {
-      throw new Error("Qwen response was not JSON");
-    }
-
-    return JSON.parse(match[0]) as QwenJson;
+    return `: ${text}`;
   }
 }
 
-function normalizeQwenJson(
-  parsed: QwenJson,
-): Pick<ModerationResult, "outcome" | "score" | "reason" | "categories"> {
-  const outcome =
-    parsed.outcome === "APPROVED" ||
-    parsed.outcome === "REJECTED" ||
-    parsed.outcome === "NEEDS_REVIEW"
-      ? parsed.outcome
-      : "NEEDS_REVIEW";
+function normalizeOpenAIModerationResult(
+  result: NonNullable<OpenAIModerationResponse["results"]>[number],
+): {
+  outcome: "APPROVED" | "REJECTED";
+  score: number | null;
+  reason: string;
+  categories: string[];
+} {
+  const categories = collectFlaggedCategories(result.categories);
+  const score = highestCategoryScore(result.category_scores, categories);
+  const flagged = result.flagged ?? categories.length > 0;
 
   return {
-    outcome,
-    score: typeof parsed.score === "number" ? parsed.score : null,
-    reason: parsed.reason || "No moderation reason returned.",
-    categories: Array.isArray(parsed.categories) ? parsed.categories : [],
+    outcome: flagged ? "REJECTED" : "APPROVED",
+    score,
+    reason: flagged
+      ? categories.length > 0
+        ? `OpenAI moderation flagged ${formatCategoryList(categories)}.`
+        : "OpenAI moderation flagged the submission."
+      : "OpenAI moderation found no flagged categories.",
+    categories,
   };
+}
+
+function collectFlaggedCategories(categories?: Record<string, boolean>) {
+  return Object.entries(categories ?? {})
+    .filter(([, flagged]) => flagged)
+    .map(([category]) => category);
+}
+
+function highestCategoryScore(
+  scores?: Record<string, number>,
+  categories?: string[],
+) {
+  if (!scores) {
+    return null;
+  }
+
+  const selectedScores = (categories ?? [])
+    .map((category) => scores[category])
+    .filter((score): score is number => typeof score === "number");
+
+  if (selectedScores.length > 0) {
+    return Math.max(...selectedScores);
+  }
+
+  const allScores = Object.values(scores).filter(
+    (score): score is number => typeof score === "number",
+  );
+
+  return allScores.length > 0 ? Math.max(...allScores) : null;
+}
+
+function formatCategoryList(categories: string[]) {
+  if (categories.length === 1) {
+    return categories[0];
+  }
+
+  if (categories.length === 2) {
+    return `${categories[0]} and ${categories[1]}`;
+  }
+
+  return `${categories.slice(0, -1).join(", ")}, and ${
+    categories[categories.length - 1]
+  }`;
 }
 
 function resultFromOutcome(

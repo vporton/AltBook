@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "license": "MIT",
-  "description": "Open source MoltBook alternative with human posting, Qwen moderation, Prisma, and Fly.io deployment.",
+  "description": "Open source MoltBook alternative with human posting, OpenAI moderation, Prisma, and Fly.io deployment.",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
