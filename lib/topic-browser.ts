@@ -31,36 +31,34 @@ export async function getTopicBrowserPage({
   where?: Prisma.TopicWhereInput;
 }) {
   const skip = (page - 1) * TOPIC_BROWSER_PAGE_SIZE;
-  const [totalCount, topics] = await Promise.all([
-    prisma.topic.count({ where }),
-    prisma.topic.findMany({
-      where,
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      skip,
-      take: TOPIC_BROWSER_PAGE_SIZE,
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-        description: true,
-        createdByAuthor: {
-          select: {
-            twitterHandle: true,
-            displayName: true,
-          },
+  const totalCount = await prisma.topic.count({ where });
+  const topics = await prisma.topic.findMany({
+    where,
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    skip,
+    take: TOPIC_BROWSER_PAGE_SIZE,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      createdByAuthor: {
+        select: {
+          twitterHandle: true,
+          displayName: true,
         },
-        _count: {
-          select: {
-            posts: {
-              where: {
-                status: PublicationStatus.APPROVED,
-              },
+      },
+      _count: {
+        select: {
+          posts: {
+            where: {
+              status: PublicationStatus.APPROVED,
             },
           },
         },
       },
-    }),
-  ]);
+    },
+  });
   const totalPages = Math.max(1, Math.ceil(totalCount / TOPIC_BROWSER_PAGE_SIZE));
 
   return {

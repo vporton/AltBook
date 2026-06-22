@@ -36,19 +36,18 @@ export async function generateMetadata({
 
 export default async function Home({ searchParams }: HomeProps) {
   const page = parseTopicPage(searchParams?.page);
-  const [allTopics, topicPage, currentAuthor] = await Promise.all([
-    prisma.topic.findMany({
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      select: {
-        id: true,
-        name: true,
-      },
-    }),
-    getTopicBrowserPage({
-      page,
-    }),
-    getCurrentAuthor(),
-  ]);
+  const currentAuthorPromise = getCurrentAuthor();
+  const allTopics = await prisma.topic.findMany({
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+  const topicPage = await getTopicBrowserPage({
+    page,
+  });
+  const currentAuthor = await currentAuthorPromise;
 
   if (page > topicPage.totalPages) {
     notFound();
