@@ -1,12 +1,13 @@
 import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Prisma } from "@prisma/client";
+import { runtimeDatabaseUrl } from "@/lib/database-url";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = runtimeDatabaseUrl();
 
 function createPrismaClient() {
   if (!connectionString) {
@@ -19,6 +20,10 @@ function createPrismaClient() {
     return new PrismaClient({
       adapter: new PrismaPg({
         connectionString,
+        connectionTimeoutMillis: 10_000,
+        idleTimeoutMillis: 30_000,
+        keepAlive: true,
+        max: 5,
       }) as Prisma.PrismaClientOptions["adapter"],
       log:
         process.env.NODE_ENV === "development"

@@ -286,7 +286,7 @@ async function exchangeCodeForToken(
 async function fetchTwitterProfile(accessToken: string) {
   console.info("Fetching Twitter profile.");
   const primary = await fetchTwitterProfileFromEndpoint(
-    "https://api.x.com/2/users/me",
+    "https://api.twitter.com/2/users/me",
     accessToken,
   );
 
@@ -296,7 +296,7 @@ async function fetchTwitterProfile(accessToken: string) {
 
   if (primary.response.status === 403) {
     const fallback = await fetchTwitterProfileFromEndpoint(
-      "https://api.twitter.com/2/users/me",
+      "https://api.x.com/2/users/me",
       accessToken,
     );
 

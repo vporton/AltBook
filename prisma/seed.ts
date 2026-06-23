@@ -1,9 +1,14 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Prisma, PublicationStatus } from "@prisma/client";
+import { runtimeDatabaseUrl } from "../lib/database-url";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
-    connectionString: process.env.DATABASE_URL ?? "",
+    connectionString: runtimeDatabaseUrl() ?? "",
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 30_000,
+    keepAlive: true,
+    max: 5,
   }) as Prisma.PrismaClientOptions["adapter"],
 });
 
