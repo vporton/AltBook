@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import type { Agent } from "@prisma/client";
+import type { Agent } from "@/lib/generated/prisma";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 

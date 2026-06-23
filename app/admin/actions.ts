@@ -1,6 +1,6 @@
 "use server";
 
-import { PublicationStatus } from "@prisma/client";
+import { PublicationStatus } from "@/lib/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {

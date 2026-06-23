@@ -1,4 +1,4 @@
-import { PublicationStatus, type Prisma } from "@prisma/client";
+import { PublicationStatus, type Prisma } from "@/lib/generated/prisma";
 import { prisma } from "@/lib/prisma";
 
 export const TOPIC_BROWSER_PAGE_SIZE = 20;

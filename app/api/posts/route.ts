@@ -1,4 +1,4 @@
-import { PublicationStatus } from "@prisma/client";
+import { PublicationStatus } from "@/lib/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";

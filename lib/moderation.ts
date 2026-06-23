@@ -1,4 +1,4 @@
-import { PublicationStatus } from "@prisma/client";
+import { PublicationStatus } from "@/lib/generated/prisma";
 import { assessLinks, type LinkAssessment } from "@/lib/links";
 
 type ModerationKind = "post" | "comment";

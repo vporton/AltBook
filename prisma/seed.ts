@@ -1,5 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Prisma, PublicationStatus } from "@prisma/client";
+import { PrismaClient, Prisma, PublicationStatus } from "../lib/generated/prisma";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
