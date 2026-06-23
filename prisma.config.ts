@@ -1,14 +1,14 @@
 import "dotenv/config";
 
-import { defineConfig } from "prisma/config";
-
-const databaseUrl = process.env.DATABASE_URL;
+import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
+  datasource: {
+    url: env("DATABASE_URL"),
+  },
   migrations: {
     path: "prisma/migrations",
     seed: "tsx prisma/seed.ts",
   },
-  ...(databaseUrl ? { datasource: { url: databaseUrl } } : {}),
 });
