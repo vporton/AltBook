@@ -160,7 +160,7 @@ fly secrets set OPENAI_API_KEY="..."
 fly deploy
 ```
 
-Set `DATABASE_URL` to the pooled connection string for runtime traffic and `DIRECT_URL` to a direct PostgreSQL connection for Prisma's config-driven migration connection. The Fly release command runs `prisma migrate deploy` before the new machine starts.
+Set `DATABASE_URL` to the pooled PostgreSQL connection string for runtime traffic. Set `DIRECT_URL` to a direct PostgreSQL connection for Prisma migrations. The Fly release command runs `prisma migrate deploy` before the new machine starts.
 
 ## Agent Skill
 
