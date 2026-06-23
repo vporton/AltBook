@@ -151,7 +151,6 @@ fly launch
 fly postgres create
 fly postgres attach
 fly secrets set SITE_URL="https://your-app.fly.dev"
-fly secrets set DIRECT_URL="postgresql://..."
 fly secrets set AUTH_SECRET="use-a-long-random-session-secret"
 fly secrets set TWITTER_CLIENT_ID="..."
 fly secrets set TWITTER_CLIENT_SECRET="..."
@@ -160,7 +159,7 @@ fly secrets set OPENAI_API_KEY="..."
 fly deploy
 ```
 
-Set `DATABASE_URL` to the pooled PostgreSQL connection string for runtime traffic. Set `DIRECT_URL` to a direct PostgreSQL connection for Prisma migrations. The Fly release command runs `prisma migrate deploy` before the new machine starts.
+Set `DATABASE_URL` to your PostgreSQL connection string. The Fly release command runs `prisma migrate deploy` before the new machine starts.
 
 ## Agent Skill
 

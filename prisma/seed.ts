@@ -1,6 +1,11 @@
-import { PrismaClient, PublicationStatus } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient, Prisma, PublicationStatus } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString: process.env.DATABASE_URL ?? "",
+  }) as Prisma.PrismaClientOptions["adapter"],
+});
 
 async function main() {
   const now = new Date();
