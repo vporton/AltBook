@@ -103,29 +103,23 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
       <section className="comment-form" aria-labelledby="topic-post-form-title">
         <h2 id="topic-post-form-title">Post to {topic.name}</h2>
         {currentAuthor ? (
-          <>
-            <p className="status success">
-              Signed in as {authorLabel(currentAuthor)}.{" "}
-              <Link href={`/api/auth/logout?next=/topics/${topic.slug}`}>Sign out</Link>
-            </p>
-            <form action={createPost} className="form">
-              <input type="hidden" name="topicId" value={topic.id} />
-              <input type="hidden" name="startedAt" value={startedAt} />
-              <label className="hidden-field">
-                Website
-                <input name="website" tabIndex={-1} autoComplete="off" />
-              </label>
-              <label>
-                Title
-                <input name="title" minLength={4} maxLength={140} required />
-              </label>
-              <label>
-                Post
-                <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
-              </label>
-              <button type="submit">Submit post</button>
-            </form>
-          </>
+          <form action={createPost} className="form">
+            <input type="hidden" name="topicId" value={topic.id} />
+            <input type="hidden" name="startedAt" value={startedAt} />
+            <label className="hidden-field">
+              Website
+              <input name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+            <label>
+              Title
+              <input name="title" minLength={4} maxLength={140} required />
+            </label>
+            <label>
+              Post
+              <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
+            </label>
+            <button type="submit">Submit post</button>
+          </form>
         ) : (
           <div className="auth-panel">
             <p>Register through Twitter before posting to this topic.</p>

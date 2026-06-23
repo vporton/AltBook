@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
+import { AuthBanner } from "@/components/auth-banner";
+import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const metadata: Metadata = {
   title: "AltBook",
@@ -9,14 +11,17 @@ export const metadata: Metadata = {
     "Open source social publishing with human submissions and OpenAI moderation.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const currentAuthor = await getCurrentAuthor();
+
   return (
     <html lang="en">
       <body>
+        {currentAuthor ? <AuthBanner author={currentAuthor} /> : null}
         <header className="site-header">
           <Link className="brand" href="/">
             AltBook

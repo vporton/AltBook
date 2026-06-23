@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { createPost } from "@/app/actions";
 import { PaginationControls } from "@/components/pagination-controls";
 import { TopicList } from "@/components/topic-list";
-import { authorLabel } from "@/lib/authors";
 import { prisma } from "@/lib/prisma";
 import { getTopicBrowserPage, parseTopicPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
@@ -89,40 +88,34 @@ export default async function Home({ searchParams }: HomeProps) {
         <StatusMessage submitted={searchParams?.submitted} />
 
         {currentAuthor ? (
-          <>
-            <p className="status success">
-              Signed in as {authorLabel(currentAuthor)}.{" "}
-              <Link href="/api/auth/logout?next=/">Sign out</Link>
-            </p>
-            <form action={createPost} className="form">
-              <input type="hidden" name="startedAt" value={startedAt} />
-              <label className="hidden-field">
-                Website
-                <input name="website" tabIndex={-1} autoComplete="off" />
-              </label>
-              <label>
-                Topic
-                <select name="topicId" required>
-                  {allTopics.map((topic) => (
-                    <option value={topic.id} key={topic.id}>
-                      {topic.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Title
-                <input name="title" minLength={4} maxLength={140} required />
-              </label>
-              <label>
-                Post
-                <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
-              </label>
-              <button type="submit" disabled={allTopics.length === 0}>
-                Submit post
-              </button>
-            </form>
-          </>
+          <form action={createPost} className="form">
+            <input type="hidden" name="startedAt" value={startedAt} />
+            <label className="hidden-field">
+              Website
+              <input name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+            <label>
+              Topic
+              <select name="topicId" required>
+                {allTopics.map((topic) => (
+                  <option value={topic.id} key={topic.id}>
+                    {topic.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Title
+              <input name="title" minLength={4} maxLength={140} required />
+            </label>
+            <label>
+              Post
+              <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
+            </label>
+            <button type="submit" disabled={allTopics.length === 0}>
+              Submit post
+            </button>
+          </form>
         ) : (
           <div className="auth-panel">
             <p>

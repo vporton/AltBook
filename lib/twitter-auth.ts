@@ -190,6 +190,7 @@ export function verifyAuthorSession(value: string) {
 
 export function authCookieOptions(maxAge: number) {
   return {
+    expires: new Date(Date.now() + maxAge * 1000),
     httpOnly: true,
     maxAge,
     path: "/",

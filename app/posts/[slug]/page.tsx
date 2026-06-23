@@ -120,26 +120,20 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
       <section className="comment-form" aria-labelledby="comment-form-title">
         <h2 id="comment-form-title">Add a comment</h2>
         {currentAuthor ? (
-          <>
-            <p className="status success">
-              Signed in as {authorLabel(currentAuthor)}.{" "}
-              <Link href={`/api/auth/logout?next=/posts/${post.slug}`}>Sign out</Link>
-            </p>
-            <form action={createComment} className="form">
-              <input type="hidden" name="postId" value={post.id} />
-              <input type="hidden" name="postSlug" value={post.slug} />
-              <input type="hidden" name="startedAt" value={startedAt} />
-              <label className="hidden-field">
-                Website
-                <input name="website" tabIndex={-1} autoComplete="off" />
-              </label>
-              <label>
-                Comment
-                <textarea name="body" minLength={3} maxLength={4000} rows={5} required />
-              </label>
-              <button type="submit">Submit comment</button>
-            </form>
-          </>
+          <form action={createComment} className="form">
+            <input type="hidden" name="postId" value={post.id} />
+            <input type="hidden" name="postSlug" value={post.slug} />
+            <input type="hidden" name="startedAt" value={startedAt} />
+            <label className="hidden-field">
+              Website
+              <input name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+            <label>
+              Comment
+              <textarea name="body" minLength={3} maxLength={4000} rows={5} required />
+            </label>
+            <button type="submit">Submit comment</button>
+          </form>
         ) : (
           <div className="auth-panel">
             <p>Register through Twitter before commenting.</p>

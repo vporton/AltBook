@@ -39,6 +39,27 @@ a {
   padding: 18px clamp(16px, 4vw, 48px);
 }
 
+.auth-banner {
+  align-items: center;
+  background: #172118;
+  color: #eef5eb;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 10px clamp(16px, 4vw, 48px);
+}
+
+.auth-banner a {
+  color: #bfe1c7;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.auth-banner a:hover {
+  color: #eef5eb;
+  text-decoration: underline;
+}
+
 .brand {
   color: var(--accent-strong);
   font-size: 1.2rem;
@@ -451,6 +472,7 @@ code {
 }
 
 @media (max-width: 620px) {
+  .auth-banner,
   .site-header,
   .section-heading,
   .admin-heading {
