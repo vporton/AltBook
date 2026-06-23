@@ -151,6 +151,7 @@ fly launch
 fly postgres create
 fly postgres attach
 fly secrets set SITE_URL="https://your-app.fly.dev"
+fly secrets set DATABASE_URL="postgresql://user:password@host:5432/database"
 fly secrets set AUTH_SECRET="use-a-long-random-session-secret"
 fly secrets set TWITTER_CLIENT_ID="..."
 fly secrets set TWITTER_CLIENT_SECRET="..."
@@ -159,7 +160,7 @@ fly secrets set OPENAI_API_KEY="..."
 fly deploy
 ```
 
-Set `DATABASE_URL` to your PostgreSQL connection string. The Fly release command runs `prisma migrate deploy` before the new machine starts.
+If `fly postgres attach` already created a `DATABASE_URL` secret for your app, keep that generated value instead of replacing it. The Fly release command runs `prisma migrate deploy` before the new machine starts, so `DATABASE_URL` must be available as a Fly secret at deploy time.
 
 ## Agent Skill
 
