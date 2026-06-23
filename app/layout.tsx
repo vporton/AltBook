@@ -18,7 +18,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const currentAuthor = await getCurrentAuthor();
+  const currentAuthor = await getCurrentAuthor().catch(() => null);
 
   return (
     <html lang="en">

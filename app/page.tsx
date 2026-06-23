@@ -36,17 +36,34 @@ export async function generateMetadata({
 export default async function Home({ searchParams }: HomeProps) {
   const page = parseTopicPage(searchParams?.page);
   const currentAuthorPromise = getCurrentAuthor();
-  const allTopics = await prisma.topic.findMany({
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    select: {
-      id: true,
-      name: true,
-    },
-  });
-  const topicPage = await getTopicBrowserPage({
-    page,
-  });
-  const currentAuthor = await currentAuthorPromise;
+  const [allTopicsResult, topicPageResult, currentAuthorResult] =
+    await Promise.allSettled([
+      prisma.topic.findMany({
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          name: true,
+        },
+      }),
+      getTopicBrowserPage({
+        page,
+      }),
+      currentAuthorPromise,
+    ]);
+
+  const allTopics = allTopicsResult.status === "fulfilled" ? allTopicsResult.value : [];
+  const topicPage =
+    topicPageResult.status === "fulfilled"
+      ? topicPageResult.value
+      : {
+          totalCount: 0,
+          totalPages: 1,
+          topics: [],
+        };
+  const currentAuthor =
+    currentAuthorResult.status === "fulfilled" ? currentAuthorResult.value : null;
+  const dataUnavailable =
+    allTopicsResult.status === "rejected" || topicPageResult.status === "rejected";
 
   if (page > topicPage.totalPages) {
     notFound();
@@ -87,7 +104,7 @@ export default async function Home({ searchParams }: HomeProps) {
         <AuthStatus value={searchParams?.auth} />
         <StatusMessage submitted={searchParams?.submitted} />
 
-        {currentAuthor ? (
+        {currentAuthor && !dataUnavailable ? (
           <form action={createPost} className="form">
             <input type="hidden" name="startedAt" value={startedAt} />
             <label className="hidden-field">
@@ -116,6 +133,10 @@ export default async function Home({ searchParams }: HomeProps) {
               Submit post
             </button>
           </form>
+        ) : currentAuthor ? (
+          <div className="status danger">
+            Publishing is temporarily unavailable while the database reconnects.
+          </div>
         ) : (
           <div className="auth-panel">
             <p>
@@ -196,7 +217,11 @@ Authorization: Bearer $ACCESS_TOKEN
         </div>
 
         <TopicList
-          emptyMessage="No topics yet. Create one through the API."
+          emptyMessage={
+            dataUnavailable
+              ? "Topics are temporarily unavailable."
+              : "No topics yet. Create one through the API."
+          }
           topics={topicPage.topics}
         />
 
