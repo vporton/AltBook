@@ -1,4 +1,4 @@
-import { PublicationStatus } from "@/lib/generated/prisma";
+import { PublicationStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { CursorPaginationError, parseCursorPagination } from "@/lib/cursor-pagination";
 import { authorizeAgentRequest } from "@/lib/api-auth";

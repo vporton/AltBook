@@ -6,3 +6,4 @@ coverage
 dist
 *.log
 prisma/dev.db
+lib/generated/prisma

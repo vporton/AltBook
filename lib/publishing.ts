@@ -1,4 +1,4 @@
-import { Prisma, PublicationStatus } from "@/lib/generated/prisma";
+import { Prisma, PublicationStatus } from "@prisma/client";
 import { z } from "zod";
 import { moderateSubmission, type ModerationResult } from "@/lib/moderation";
 import { prisma } from "@/lib/prisma";

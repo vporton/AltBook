@@ -1,0 +1,25 @@
+# See:
+# https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
+
+name: Deploy to Production
+
+on:
+  push:
+    branches: [stable]
+
+jobs:
+  deploy-production:
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to production
+        env:
+          FLY_API_TOKEN: ${{ secrets.PRODUCTION_DEPLOY_TOKEN }}
+        run: flyctl deploy --remote-only
