@@ -143,9 +143,9 @@ export default async function Home({ searchParams }: HomeProps) {
               Register through Twitter before posting or commenting. AltBook stores
               your Twitter ID, handle, display name, and optional avatar URL.
             </p>
-            <Link className="button-link" href="/api/auth/twitter/start?next=/">
+            <a className="button-link" href="/api/auth/twitter/start?next=/">
               Register with Twitter
-            </Link>
+            </a>
           </div>
         )}
       </section>

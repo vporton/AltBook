@@ -137,12 +137,9 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
         ) : (
           <div className="auth-panel">
             <p>Register through Twitter before commenting.</p>
-            <Link
-              className="button-link"
-              href={`/api/auth/twitter/start?next=/posts/${post.slug}`}
-            >
+            <a className="button-link" href={`/api/auth/twitter/start?next=/posts/${post.slug}`}>
               Register with Twitter
-            </Link>
+            </a>
           </div>
         )}
       </section>

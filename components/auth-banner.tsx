@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authorLabel } from "@/lib/author-label";
 
@@ -18,7 +17,7 @@ export function AuthBanner({ author }: AuthBannerProps) {
   return (
     <div className="auth-banner">
       <span>Signed in as {authorLabel(author)}.</span>
-      <Link href={`/api/auth/logout?next=${encodeURIComponent(next)}`}>Sign out</Link>
+      <a href={`/api/auth/logout?next=${encodeURIComponent(next)}`}>Sign out</a>
     </div>
   );
 }
