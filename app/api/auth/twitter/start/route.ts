@@ -42,5 +42,7 @@ export async function GET(request: Request) {
   response.cookies.set(TWITTER_VERIFIER_COOKIE, verifier, cookieOptions);
   response.cookies.set(TWITTER_NEXT_COOKIE, next, cookieOptions);
 
+  console.info("Twitter OAuth redirect response prepared.");
+
   return response;
 }

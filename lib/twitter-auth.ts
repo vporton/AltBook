@@ -2,6 +2,7 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypt
 import { cookies } from "next/headers";
 import { registerTwitterAuthor } from "@/lib/authors";
 import { prisma } from "@/lib/prisma";
+import { fetchWithTimeout } from "@/lib/with-timeout";
 
 export const AUTHOR_SESSION_COOKIE = "altbook_author_session";
 export const TWITTER_STATE_COOKIE = "altbook_twitter_state";
@@ -13,6 +14,7 @@ const OAUTH_COOKIE_MAX_AGE = 60 * 10;
 const TWITTER_AUTHORIZE_URL = "https://x.com/i/oauth2/authorize";
 const TWITTER_TOKEN_URL = "https://api.x.com/2/oauth2/token";
 const TWITTER_DEFAULT_SCOPE = "tweet.read users.read";
+const TWITTER_FETCH_TIMEOUT_MS = 10000;
 const TWITTER_ALLOWED_SCOPES = new Set([
   "tweet.read",
   "tweet.write",
@@ -231,6 +233,7 @@ async function exchangeCodeForToken(
   code: string,
   verifier: string,
 ) {
+  console.info("Exchanging Twitter OAuth code for token.");
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,
@@ -251,12 +254,17 @@ async function exchangeCodeForToken(
     );
   }
 
-  const response = await fetch(TWITTER_TOKEN_URL, {
-    method: "POST",
-    headers,
-    body,
-    cache: "no-store",
-  });
+  const response = await fetchWithTimeout(
+    TWITTER_TOKEN_URL,
+    {
+      method: "POST",
+      headers,
+      body,
+      cache: "no-store",
+    },
+    TWITTER_FETCH_TIMEOUT_MS,
+    "Twitter token exchange",
+  );
   const { payload: token, rawBody } = await readJsonResponse<
     TwitterTokenResponse & TwitterErrorResponse
   >(response);
@@ -276,6 +284,7 @@ async function exchangeCodeForToken(
 }
 
 async function fetchTwitterProfile(accessToken: string) {
+  console.info("Fetching Twitter profile.");
   const primary = await fetchTwitterProfileFromEndpoint(
     "https://api.x.com/2/users/me",
     accessToken,
@@ -373,13 +382,18 @@ function hasInvalidTwitterClientId(clientId: string) {
 }
 
 async function fetchTwitterProfileFromEndpoint(url: string, accessToken: string) {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
+  const response = await fetchWithTimeout(
+    url,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+    TWITTER_FETCH_TIMEOUT_MS,
+    "Twitter profile lookup",
+  );
   const { payload, rawBody } = await readJsonResponse<TwitterUserMeResponse & TwitterErrorResponse>(
     response,
   );
