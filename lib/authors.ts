@@ -19,53 +19,82 @@ export async function registerTwitterAuthor(input: unknown) {
   const payload = twitterAuthorInputSchema.parse(input);
   const avatarUrl = payload.avatarUrl || null;
 
-  return prisma.$transaction(async (tx) => {
-    const existingByTwitterId = await tx.author.findUnique({
-      where: {
-        twitterId: payload.twitterId,
-      },
-    });
+  const updateData = {
+    twitterId: payload.twitterId,
+    twitterHandle: payload.twitterHandle,
+    displayName: payload.displayName,
+    avatarUrl,
+  };
 
-    if (existingByTwitterId) {
-      return tx.author.update({
-        where: {
-          twitterId: payload.twitterId,
-        },
-        data: {
-          twitterHandle: payload.twitterHandle,
-          displayName: payload.displayName,
-          avatarUrl,
-        },
-      });
-    }
-
-    const existingByHandle = await tx.author.findUnique({
-      where: {
-        twitterHandle: payload.twitterHandle,
-      },
-    });
-
-    if (existingByHandle) {
-      return tx.author.update({
-        where: {
-          id: existingByHandle.id,
-        },
-        data: {
-          twitterId: payload.twitterId,
-          twitterHandle: payload.twitterHandle,
-          displayName: payload.displayName,
-          avatarUrl,
-        },
-      });
-    }
-
-    return tx.author.create({
-      data: {
-        twitterId: payload.twitterId,
-        twitterHandle: payload.twitterHandle,
-        displayName: payload.displayName,
-        avatarUrl,
-      },
-    });
+  const existingByTwitterId = await prisma.author.findUnique({
+    where: {
+      twitterId: payload.twitterId,
+    },
   });
+
+  if (existingByTwitterId) {
+    return prisma.author.update({
+      where: {
+        twitterId: payload.twitterId,
+      },
+      data: updateData,
+    });
+  }
+
+  const existingByHandle = await prisma.author.findUnique({
+    where: {
+      twitterHandle: payload.twitterHandle,
+    },
+  });
+
+  if (existingByHandle) {
+    return prisma.author.update({
+      where: {
+        id: existingByHandle.id,
+      },
+      data: updateData,
+    });
+  }
+
+  try {
+    return await prisma.author.create({
+      data: updateData,
+    });
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) {
+      throw error;
+    }
+
+    const conflictedAuthor =
+      (await prisma.author.findUnique({
+        where: {
+          twitterId: payload.twitterId,
+        },
+      })) ??
+      (await prisma.author.findUnique({
+        where: {
+          twitterHandle: payload.twitterHandle,
+        },
+      }));
+
+    if (!conflictedAuthor) {
+      throw error;
+    }
+
+    return prisma.author.update({
+      where: {
+        id: conflictedAuthor.id,
+      },
+      data: updateData,
+    });
+  }
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "P2002"
+  );
 }
