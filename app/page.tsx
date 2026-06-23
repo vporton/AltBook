@@ -7,6 +7,7 @@ import { TopicList } from "@/components/topic-list";
 import { prisma } from "@/lib/prisma";
 import { getTopicBrowserPage, parseTopicPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
+import { withTimeout } from "@/lib/with-timeout";
 
 export const dynamic = "force-dynamic";
 
@@ -35,19 +36,21 @@ export async function generateMetadata({
 
 export default async function Home({ searchParams }: HomeProps) {
   const page = parseTopicPage(searchParams?.page);
-  const currentAuthorPromise = getCurrentAuthor();
+  const currentAuthorPromise = withTimeout(getCurrentAuthor(), 2500, "author lookup");
   const [allTopicsResult, topicPageResult, currentAuthorResult] =
     await Promise.allSettled([
-      prisma.topic.findMany({
-        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-        select: {
-          id: true,
-          name: true,
-        },
-      }),
-      getTopicBrowserPage({
-        page,
-      }),
+      withTimeout(
+        prisma.topic.findMany({
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          select: {
+            id: true,
+            name: true,
+          },
+        }),
+        3000,
+        "topic list",
+      ),
+      withTimeout(getTopicBrowserPage({ page }), 3000, "topic browser"),
       currentAuthorPromise,
     ]);
 

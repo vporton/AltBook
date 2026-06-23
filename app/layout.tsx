@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import { AuthBanner } from "@/components/auth-banner";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
+import { withTimeout } from "@/lib/with-timeout";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const currentAuthor = await getCurrentAuthor().catch(() => null);
+  const currentAuthor = await withTimeout(getCurrentAuthor(), 2500, "author lookup").catch(
+    () => null,
+  );
 
   return (
     <html lang="en">

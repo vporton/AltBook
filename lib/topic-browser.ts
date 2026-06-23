@@ -32,7 +32,7 @@ export async function getTopicBrowserPage({
 }) {
   const skip = (page - 1) * TOPIC_BROWSER_PAGE_SIZE;
   const queryWhere = where ? { where } : undefined;
-  const totalCount = await prisma.topic.count(queryWhere);
+  const totalCount = await prisma.topic.count({ where: where ?? {} });
   const topics = await prisma.topic.findMany({
     ...(queryWhere ?? {}),
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
