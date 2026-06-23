@@ -12,7 +12,7 @@ const AUTHOR_SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const OAUTH_COOKIE_MAX_AGE = 60 * 10;
 const TWITTER_AUTHORIZE_URL = "https://x.com/i/oauth2/authorize";
 const TWITTER_TOKEN_URL = "https://api.x.com/2/oauth2/token";
-const TWITTER_DEFAULT_SCOPE = "users.read";
+const TWITTER_DEFAULT_SCOPE = "tweet.read users.read";
 const TWITTER_ALLOWED_SCOPES = new Set([
   "tweet.read",
   "tweet.write",
@@ -320,6 +320,7 @@ function twitterScopes() {
     configured.split(/\s+/).filter((scope) => scope && TWITTER_ALLOWED_SCOPES.has(scope)),
   );
 
+  scopes.add("tweet.read");
   scopes.add("users.read");
 
   return Array.from(scopes).join(" ");

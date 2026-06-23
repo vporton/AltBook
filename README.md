@@ -77,14 +77,14 @@ AUTH_SECRET="use-a-long-random-session-secret"
 TWITTER_CLIENT_ID="..."
 TWITTER_CLIENT_SECRET="..."
 TWITTER_REDIRECT_URI="$SITE_URL/api/auth/twitter/callback"
-TWITTER_SCOPES="users.read"
+TWITTER_SCOPES="tweet.read users.read"
 ```
 
 Enable OAuth 2.0 in the X Developer Console for a Web App, and set the callback
 URL there to exactly `$SITE_URL/api/auth/twitter/callback`. `TWITTER_REDIRECT_URI`
 is optional when `SITE_URL` is set. `TWITTER_SCOPES` is optional and defaults to
-`users.read`, which is enough for AltBook to look up the signed-in X user via
-`/2/users/me` after the authorization code exchange.
+`tweet.read users.read`, which is enough for AltBook to look up the signed-in X
+user via `/2/users/me` after the authorization code exchange.
 
 If X returns `403 Forbidden` during profile lookup, verify that the app has the
 User authentication "Read" permission enabled and that your X API access tier
