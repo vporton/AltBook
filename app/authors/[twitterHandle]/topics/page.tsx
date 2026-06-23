@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { authorLabel } from "@/lib/authors";
+import { authorLabel } from "@/lib/author-label";
 import { prisma } from "@/lib/prisma";
 import {
   getTopicBrowserPage,

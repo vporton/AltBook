@@ -1,4 +1,4 @@
-import type { Author } from "@prisma/client";
+import "server-only";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
@@ -68,8 +68,4 @@ export async function registerTwitterAuthor(input: unknown) {
       },
     });
   });
-}
-
-export function authorLabel(author: Pick<Author, "displayName" | "twitterHandle">) {
-  return `${author.displayName} (@${author.twitterHandle})`;
 }

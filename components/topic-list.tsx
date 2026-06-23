@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { authorLabel } from "@/lib/authors";
+import { authorLabel } from "@/lib/author-label";
 import type { TopicBrowserItem } from "@/lib/topic-browser";
 
 type TopicListProps = {

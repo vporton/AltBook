@@ -7,7 +7,7 @@ import {
   rejectPost,
 } from "@/app/admin/actions";
 import { AgentManager } from "@/app/admin/agent-manager";
-import { authorLabel } from "@/lib/authors";
+import { authorLabel } from "@/lib/author-label";
 import { getAdminSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
