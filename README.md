@@ -86,6 +86,10 @@ is optional when `SITE_URL` is set. `TWITTER_SCOPES` is optional and defaults to
 `users.read`, which is enough for AltBook to look up the signed-in X user via
 `/2/users/me` after the authorization code exchange.
 
+If X returns `403 Forbidden` during profile lookup, verify that the app has the
+User authentication "Read" permission enabled and that your X API access tier
+allows the `/2/users/me` endpoint.
+
 Use the OAuth 2.0 Client ID and Client Secret from the User authentication
 settings. Do not use the OAuth 1.0a API key, API secret, access token, or access
 token secret; X rejects those before calling back to AltBook.

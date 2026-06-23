@@ -50,12 +50,18 @@ type TwitterTokenResponse = {
   error_description?: string;
 };
 
+type TwitterErrorResponse = {
+  title?: string;
+  detail?: string;
+  error?: string;
+  status?: number;
+};
+
 type TwitterUserMeResponse = {
   data?: {
     id?: string;
     name?: string;
     username?: string;
-    profile_image_url?: string;
   };
 };
 
@@ -125,7 +131,7 @@ export async function registerTwitterAuthorFromCode(
     twitterId: profile.data.id,
     twitterHandle: profile.data.username,
     displayName: profile.data.name ?? profile.data.username,
-    avatarUrl: profile.data.profile_image_url ?? "",
+    avatarUrl: "",
   });
 }
 
@@ -250,11 +256,18 @@ async function exchangeCodeForToken(
     body,
     cache: "no-store",
   });
-  const token = (await response.json()) as TwitterTokenResponse;
+  const { payload: token, rawBody } = await readJsonResponse<
+    TwitterTokenResponse & TwitterErrorResponse
+  >(response);
 
   if (!response.ok || !token.access_token) {
     throw new Error(
-      token.error_description ?? token.error ?? "Twitter token exchange failed.",
+      formatXError(
+        "Twitter token exchange failed",
+        response.status,
+        response.statusText,
+        token.error_description ?? token.detail ?? token.error ?? rawBody,
+      ),
     );
   }
 
@@ -262,25 +275,43 @@ async function exchangeCodeForToken(
 }
 
 async function fetchTwitterProfile(accessToken: string) {
-  const response = await fetch("https://api.x.com/2/users/me?user.fields=profile_image_url", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    cache: "no-store",
-  });
+  const primary = await fetchTwitterProfileFromEndpoint(
+    "https://api.x.com/2/users/me",
+    accessToken,
+  );
 
-  const payload = (await response.json()) as TwitterUserMeResponse & {
-    error?: string;
-    title?: string;
-    detail?: string;
-  };
-
-  if (!response.ok) {
-    throw new Error(payload.detail ?? payload.title ?? payload.error ?? "X profile lookup failed.");
+  if (primary.response.ok) {
+    return primary.payload;
   }
 
-  return payload;
+  if (primary.response.status === 403) {
+    const fallback = await fetchTwitterProfileFromEndpoint(
+      "https://api.twitter.com/2/users/me",
+      accessToken,
+    );
+
+    if (fallback.response.ok) {
+      return fallback.payload;
+    }
+
+    throw new Error(
+      formatXError(
+        "X profile lookup failed",
+        fallback.response.status,
+        fallback.response.statusText,
+        extractXErrorDetail(fallback.payload, fallback.rawBody),
+      ),
+    );
+  }
+
+  throw new Error(
+    formatXError(
+      "X profile lookup failed",
+      primary.response.status,
+      primary.response.statusText,
+      extractXErrorDetail(primary.payload, primary.rawBody),
+    ),
+  );
 }
 
 function twitterScopes() {
@@ -337,4 +368,66 @@ function envValue(name: string) {
 
 function hasInvalidTwitterClientId(clientId: string) {
   return /^\d+-/.test(clientId);
+}
+
+async function fetchTwitterProfileFromEndpoint(url: string, accessToken: string) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: "no-store",
+  });
+  const { payload, rawBody } = await readJsonResponse<TwitterUserMeResponse & TwitterErrorResponse>(
+    response,
+  );
+
+  return { response, payload, rawBody };
+}
+
+async function readJsonResponse<T>(response: Response) {
+  const rawBody = await response.text();
+
+  if (!rawBody) {
+    return { payload: {} as T, rawBody };
+  }
+
+  try {
+    return { payload: JSON.parse(rawBody) as T, rawBody };
+  } catch {
+    return { payload: {} as T, rawBody };
+  }
+}
+
+function extractXErrorDetail(
+  payload: TwitterErrorResponse | TwitterUserMeResponse,
+  rawBody: string,
+) {
+  const detail =
+    "detail" in payload
+      ? payload.detail ?? payload.title ?? payload.error
+      : undefined;
+
+  if (detail) {
+    return detail;
+  }
+
+  const trimmed = rawBody.trim();
+
+  return trimmed ? trimmed.slice(0, 300) : undefined;
+}
+
+function formatXError(
+  prefix: string,
+  status: number,
+  statusText: string,
+  detail?: string | null,
+) {
+  const statusLabel = statusText ? `${status} ${statusText}` : `${status}`;
+
+  if (detail) {
+    return `${prefix} (${statusLabel}): ${detail}`;
+  }
+
+  return `${prefix} (${statusLabel}).`;
 }
