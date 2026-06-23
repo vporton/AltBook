@@ -5,6 +5,8 @@ import "./globals.css";
 import { AuthBanner } from "@/components/auth-banner";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "AltBook",
   description:
