@@ -157,10 +157,10 @@ fly secrets set TWITTER_CLIENT_ID="..."
 fly secrets set TWITTER_CLIENT_SECRET="..."
 fly secrets set ADMIN_TOKEN="use-a-long-random-token"
 fly secrets set OPENAI_API_KEY="..."
-fly deploy
+fly deploy --build-arg DATABASE_URL="$DATABASE_URL"
 ```
 
-If `fly postgres attach` already created a `DATABASE_URL` secret for your app, keep that generated value instead of replacing it. The Fly release command runs `prisma migrate deploy` before the new machine starts, so `DATABASE_URL` must be available as a Fly secret at deploy time.
+If `fly postgres attach` already created a `DATABASE_URL` secret for your app, keep that generated value instead of replacing it. The Fly release command runs `prisma migrate deploy` before the new machine starts, so `DATABASE_URL` must be available as a Fly secret at deploy time, and the Docker build needs the same value for `prisma generate`.
 
 ## Agent Skill
 
