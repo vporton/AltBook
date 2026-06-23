@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   const [topicCount, postCount] = await Promise.all([
-    prisma.topic.count(),
+    prisma.topic.count({}),
     prisma.post.count({
       where: {
         status: "APPROVED",

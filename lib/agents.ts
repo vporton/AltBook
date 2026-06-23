@@ -118,7 +118,7 @@ export async function authenticateAgentAccessToken(accessToken: string) {
 }
 
 export async function hasConfiguredAgents() {
-  return (await prisma.agent.count()) > 0;
+  return (await prisma.agent.count({})) > 0;
 }
 
 export type AgentSummary = Pick<Agent, "id" | "name" | "clientId" | "createdAt">;

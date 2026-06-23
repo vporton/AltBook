@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const topicCount = await prisma.topic.count();
+  const topicCount = await prisma.topic.count({});
 
   if (topicCount > SITEMAP_URL_LIMIT) {
     const shardCount = Math.ceil(topicCount / SITEMAP_URL_LIMIT);
