@@ -1,7 +1,18 @@
 import "dotenv/config";
 
 import { defineConfig } from "prisma/config";
-import { migrationDatabaseUrl } from "./lib/database-url";
+
+function migrationDatabaseUrl() {
+  for (const name of ["DATABASE_DIRECT_URL", "DIRECT_URL", "DATABASE_URL"]) {
+    const value = process.env[name]?.trim();
+
+    if (value) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
 
 const databaseUrl = migrationDatabaseUrl();
 
