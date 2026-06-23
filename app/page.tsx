@@ -7,7 +7,6 @@ import { TopicList } from "@/components/topic-list";
 import { prisma } from "@/lib/prisma";
 import { getTopicBrowserPage, parseTopicPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
-import { withTimeout } from "@/lib/with-timeout";
 
 export const dynamic = "force-dynamic";
 
@@ -260,4 +259,22 @@ function StatusMessage({ submitted }: { submitted?: string }) {
   }
 
   return null;
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms.`));
+    }, ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  }
 }

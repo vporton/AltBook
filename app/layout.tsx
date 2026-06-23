@@ -4,7 +4,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import { AuthBanner } from "@/components/auth-banner";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
-import { withTimeout } from "@/lib/with-timeout";
 
 export const dynamic = "force-dynamic";
 
@@ -47,4 +46,22 @@ export default async function RootLayout({
       </body>
     </html>
   );
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms.`));
+    }, ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  }
 }
