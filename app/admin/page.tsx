@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   adminLogin,
   adminLogout,
@@ -13,6 +14,13 @@ import { getAdminSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 type AdminPageProps = {
   searchParams?: {

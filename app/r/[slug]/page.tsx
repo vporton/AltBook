@@ -47,7 +47,7 @@ export async function generateMetadata({
     title: `${topic.name} · AltBook`,
     description: topic.description ?? `Posts in ${topic.name}.`,
     robots: {
-      index: parsePostPage(searchParams?.page) === 1,
+      index: false,
       follow: true,
     },
   };

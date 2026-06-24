@@ -58,9 +58,16 @@ export async function createComment(formData: FormData) {
   const isApproved = moderation.status === "APPROVED";
 
   revalidatePath(`/posts/${post.slug}`);
+  revalidatePath("/sitemap.xml");
+
+  if (comment.parentId) {
+    revalidatePath(`/posts/${post.slug}/comments/${comment.parentId}`);
+  }
+
+  revalidatePath(`/posts/${post.slug}/comments/${comment.id}`);
 
   if (isApproved) {
-    redirect(`/posts/${post.slug}?comment=approved#comment-${comment.id}`);
+    redirect(`/posts/${post.slug}/comments/${comment.id}?comment=approved`);
   }
 
   if (moderation.status === "REJECTED") {

@@ -23,16 +23,12 @@ type HomeProps = {
 export async function generateMetadata({
   searchParams,
 }: HomeProps): Promise<Metadata> {
-  if (searchParams?.page !== undefined) {
-    return {
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
-  }
-
-  return {};
+  return {
+    robots: {
+      index: false,
+      follow: true,
+    },
+  };
 }
 
 export default async function Home({ searchParams }: HomeProps) {

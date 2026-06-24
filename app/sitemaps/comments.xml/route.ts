@@ -54,7 +54,7 @@ export async function GET() {
       .map(
         (comment) =>
           `<url><loc>${escapeXml(
-            absoluteUrl(`/posts/${comment.post.slug}#comment-${comment.id}`),
+            absoluteUrl(`/posts/${comment.post.slug}/comments/${comment.id}`),
           )}</loc><lastmod>${(comment.publishedAt ?? comment.updatedAt).toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.5</priority></url>`,
       )
       .join("")}</urlset>`,

@@ -136,7 +136,7 @@ export async function GET(request: Request) {
       publishedAt: comment.publishedAt,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
-      url: absoluteUrl(`/posts/${comment.post.slug}#comment-${comment.id}`),
+      url: absoluteUrl(`/posts/${comment.post.slug}/comments/${comment.id}`),
       author: {
         id: comment.author.id,
         twitterId: comment.author.twitterId,

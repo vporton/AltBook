@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { AgentManager } from "@/app/admin/agent-manager";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default async function AgentsPage() {
   const currentAuthor = await getCurrentAuthor();

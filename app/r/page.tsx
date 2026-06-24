@@ -22,7 +22,7 @@ export function generateMetadata({
     title: "Topics · AltBook",
     description: "Browse AltBook topics.",
     robots: {
-      index: page === 1,
+      index: false,
       follow: true,
     },
   };
