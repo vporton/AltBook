@@ -165,7 +165,7 @@ fly secrets set OPENAI_API_KEY="..."
 fly deploy --build-arg DATABASE_URL="$DATABASE_URL"
 ```
 
-If `fly postgres attach` already created a `DATABASE_URL` secret for your app, keep that generated value instead of replacing it. The Fly release command runs `prisma migrate deploy` before the new machine starts, so a migration database URL must be available as a Fly secret at deploy time, and the Docker build needs the same value for `prisma generate`.
+If `fly postgres attach` already created a `DATABASE_URL` secret for your app, keep that generated value instead of replacing it. The Fly release command runs `npm run db:release` before the new machine starts, so a migration database URL must be available as a Fly secret at deploy time, and the Docker build needs the same value for `prisma generate`.
 
 At runtime, the app uses `DATABASE_POOL_URL` when it is set and falls back to `DATABASE_URL`. For providers such as Supabase or Neon, set `DATABASE_POOL_URL` to the provider's pooled IPv4-compatible connection string. Migrations use `DATABASE_DIRECT_URL`, `DIRECT_URL`, then `DATABASE_URL` in that order.
 

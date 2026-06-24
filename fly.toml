@@ -23,4 +23,4 @@ primary_region = "iad"
   cpus = 1
 
 [deploy]
-  release_command = "node_modules/.bin/prisma migrate deploy"
+  release_command = "npm run db:release"
