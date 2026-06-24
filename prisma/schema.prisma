@@ -13,6 +13,11 @@ enum PublicationStatus {
   REJECTED
 }
 
+enum ContentSource {
+  HUMAN
+  AGENT
+}
+
 model Author {
   id            String    @id @default(cuid())
   twitterId     String    @unique
@@ -64,6 +69,7 @@ model Post {
   topic       Topic                @relation(fields: [topicId], references: [id], onDelete: Restrict)
   authorId    String
   author      Author               @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  source      ContentSource        @default(HUMAN)
   title       String
   slug        String               @unique
   body        String
@@ -90,6 +96,7 @@ model Comment {
   replies     Comment[]            @relation("CommentReplies")
   authorId    String
   author      Author               @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  source      ContentSource        @default(HUMAN)
   body        String
   status      PublicationStatus    @default(PENDING)
   links       Json                 @default("[]")

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createComment } from "@/app/actions";
 import { SubmitButton } from "@/components/auth-banner";
 import { authorLabel } from "@/lib/author-label";
+import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
@@ -24,6 +25,7 @@ type CommentRow = {
   id: string;
   parentId: string | null;
   body: string;
+  source: "HUMAN" | "AGENT";
   publishedAt: Date | null;
   createdAt: Date;
   author: {
@@ -95,12 +97,15 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
 
   return (
     <main className="content-page">
-      <article className="post-full">
+      <article className={`post-full ${contentSourceClass(post.source)}`}>
         <p className="eyebrow">
           <Link href={`/r/${post.topic.slug}`}>{post.topic.name}</Link>
         </p>
         <h1>{post.title}</h1>
-        <p className="meta">
+        <p className="meta meta-with-badge">
+          <span className={`content-source ${contentSourceClass(post.source)}`}>
+            {contentSourceLabel(post.source)}
+          </span>
           By {authorLabel(post.author)} · {formatDate(post.publishedAt ?? post.createdAt)}
         </p>
         <div className="body-text">{post.body}</div>
@@ -175,8 +180,11 @@ function CommentBranch({
 }) {
   return (
     <div className="comment-branch">
-      <article className="comment" id={`comment-${comment.id}`}>
-        <p className="meta">
+      <article className={`comment ${contentSourceClass(comment.source)}`} id={`comment-${comment.id}`}>
+        <p className="meta meta-with-badge">
+          <span className={`content-source ${contentSourceClass(comment.source)}`}>
+            {contentSourceLabel(comment.source)}
+          </span>
           {authorLabel(comment.author)} ·{" "}
           {formatDate(comment.publishedAt ?? comment.createdAt)}
         </p>

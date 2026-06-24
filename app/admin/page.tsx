@@ -7,6 +7,7 @@ import {
   rejectPost,
 } from "@/app/admin/actions";
 import { authorLabel } from "@/lib/author-label";
+import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
 import { getAdminSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
@@ -89,6 +90,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             body: true,
             publishedAt: true,
             createdAt: true,
+            source: true,
             author: true,
           },
         },
@@ -143,9 +145,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         ) : (
           <div className="review-list">
             {posts.map((post) => (
-              <article className="review-item" key={post.id}>
+              <article className={`review-item ${contentSourceClass(post.source)}`} key={post.id}>
                 <h3>{post.title}</h3>
-                <p className="meta">
+                <p className="meta meta-with-badge">
+                  <span className={`content-source ${contentSourceClass(post.source)}`}>
+                    {contentSourceLabel(post.source)}
+                  </span>
                   {post.topic.name} · By {authorLabel(post.author)} ·{" "}
                   {formatDate(post.createdAt)}
                 </p>
@@ -179,14 +184,22 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         ) : (
           <div className="review-list">
             {comments.map((comment) => (
-              <article className="review-item" key={comment.id}>
+              <article className={`review-item ${contentSourceClass(comment.source)}`} key={comment.id}>
                 <h3>{comment.parent ? "Reply on" : "On"} {comment.post.title}</h3>
-                <p className="meta">
+                <p className="meta meta-with-badge">
+                  <span className={`content-source ${contentSourceClass(comment.source)}`}>
+                    {contentSourceLabel(comment.source)}
+                  </span>
                   By {authorLabel(comment.author)} · {formatDate(comment.createdAt)}
                 </p>
                 {comment.parent ? (
                   <div className="moderation-context">
-                    <p className="meta">
+                    <p className="meta meta-with-badge">
+                      <span
+                        className={`content-source ${contentSourceClass(comment.parent.source)}`}
+                      >
+                        {contentSourceLabel(comment.parent.source)}
+                      </span>
                       Replying to {authorLabel(comment.parent.author)} ·{" "}
                       {formatDate(comment.parent.publishedAt ?? comment.parent.createdAt)}
                     </p>

@@ -19,6 +19,7 @@ export async function createPost(formData: FormData) {
     body: formData.get("body"),
     topicId: formData.get("topicId"),
     authorId: author.id,
+    source: "HUMAN",
   });
   const isApproved = moderation.status === "APPROVED";
 
@@ -51,6 +52,7 @@ export async function createComment(formData: FormData) {
     parentCommentId: formData.get("parentCommentId") || undefined,
     body: formData.get("body"),
     authorId: author.id,
+    source: "HUMAN",
   });
   const isApproved = moderation.status === "APPROVED";
 

@@ -33,10 +33,13 @@ const postRefSchema = {
     .optional(),
 };
 
+const contentSourceSchema = z.enum(["HUMAN", "AGENT"]).default("HUMAN");
+
 export const postInputSchema = z
   .object({
     title: z.string().trim().min(4).max(140),
     body: z.string().trim().min(20).max(12000),
+    source: contentSourceSchema,
     ...authorRefSchema,
     ...topicRefSchema,
   })
@@ -92,6 +95,7 @@ export const commentInputSchema = z
     postId: z.string().min(1),
     parentCommentId: z.string().trim().min(1).optional(),
     body: z.string().trim().min(3).max(4000),
+    source: contentSourceSchema,
     ...authorRefSchema,
   })
   .superRefine((payload, context) => {
@@ -138,6 +142,7 @@ export async function createModeratedPost(input: unknown) {
     data: {
       topicId: topic.id,
       authorId: author.id,
+      source: payload.source,
       title: payload.title,
       slug,
       body: payload.body,
@@ -319,6 +324,7 @@ export async function createModeratedComment(input: unknown) {
       postId: post.id,
       parentId: parentComment?.id ?? null,
       authorId: author.id,
+      source: payload.source,
       body: payload.body,
       status: moderation.status,
       links: toJson(moderation.links.links),

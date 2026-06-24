@@ -80,6 +80,7 @@ export async function GET(request: Request) {
       slug: true,
       title: true,
       body: true,
+      source: true,
       status: true,
       publishedAt: true,
       createdAt: true,
@@ -120,6 +121,7 @@ export async function GET(request: Request) {
       slug: post.slug,
       title: post.title,
       body: post.body,
+      source: post.source,
       status: post.status,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
@@ -158,7 +160,10 @@ export async function POST(request: Request) {
 
   try {
     const payload = postInputSchema.parse(body.value);
-    const { post, moderation } = await createModeratedPost(payload);
+    const { post, moderation } = await createModeratedPost({
+      ...payload,
+      source: "AGENT",
+    });
 
     revalidatePath("/");
     revalidatePath(`/r/${post.topic.slug}`);
@@ -296,6 +301,7 @@ function postResponseBody(
     id: string;
     slug: string;
     status: PublicationStatus;
+    source: "HUMAN" | "AGENT";
     topic: {
       id: string;
       slug: string;
@@ -319,6 +325,7 @@ function postResponseBody(
     id: post.id,
     slug: post.slug,
     status: post.status,
+    source: post.source,
     topic: {
       id: post.topic.id,
       slug: post.topic.slug,
