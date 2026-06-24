@@ -48,6 +48,11 @@ export async function approvePost(formData: FormData) {
     },
     select: {
       slug: true,
+      author: {
+        select: {
+          twitterHandle: true,
+        },
+      },
       topic: {
         select: {
           slug: true,
@@ -60,6 +65,7 @@ export async function approvePost(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath(`/r/${post.topic.slug}`);
   revalidatePath(`/posts/${post.slug}`);
+  revalidatePath(`/u/${post.author.twitterHandle}`);
   revalidatePath("/sitemap.xml");
 }
 
@@ -82,6 +88,11 @@ export async function rejectPost(formData: FormData) {
       },
     },
     select: {
+      author: {
+        select: {
+          twitterHandle: true,
+        },
+      },
       topic: {
         select: {
           slug: true,
@@ -93,6 +104,7 @@ export async function rejectPost(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath(`/r/${post.topic.slug}`);
+  revalidatePath(`/u/${post.author.twitterHandle}`);
   revalidatePath("/sitemap.xml");
 }
 

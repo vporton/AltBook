@@ -167,6 +167,7 @@ export async function POST(request: Request) {
 
     revalidatePath("/");
     revalidatePath(`/r/${post.topic.slug}`);
+    revalidatePath(`/u/${post.author.twitterHandle}`);
     revalidatePath("/sitemap.xml");
 
     if (post.status === PublicationStatus.APPROVED) {
@@ -215,6 +216,8 @@ export async function PUT(request: Request) {
     revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/posts/${previous.slug}`);
     revalidatePath(`/posts/${post.slug}`);
+    revalidatePath(`/u/${previous.author.twitterHandle}`);
+    revalidatePath(`/u/${post.author.twitterHandle}`);
     revalidatePath("/sitemap.xml");
 
     return NextResponse.json(postResponseBody(post, moderation));
@@ -258,6 +261,7 @@ export async function DELETE(request: Request) {
     revalidatePath("/");
     revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/posts/${post.slug}`);
+    revalidatePath(`/u/${post.author.twitterHandle}`);
     revalidatePath("/sitemap.xml");
 
     return NextResponse.json({

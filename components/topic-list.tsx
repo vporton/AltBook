@@ -31,7 +31,7 @@ export function TopicList({
               {showCreator && topic.createdByAuthor ? (
                 <>
                   {" · Created by "}
-                  <Link href={`/authors/${topic.createdByAuthor.twitterHandle}/topics`}>
+                  <Link href={`/u/${topic.createdByAuthor.twitterHandle}`}>
                     {authorLabel(topic.createdByAuthor)}
                   </Link>
                 </>

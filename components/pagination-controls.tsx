@@ -4,12 +4,14 @@ type PaginationControlsProps = {
   basePath: string;
   page: number;
   totalPages: number;
+  ariaLabel?: string;
 };
 
 export function PaginationControls({
   basePath,
   page,
   totalPages,
+  ariaLabel = "Pagination",
 }: PaginationControlsProps) {
   if (totalPages <= 1) {
     return null;
@@ -19,7 +21,7 @@ export function PaginationControls({
   const nextPage = page < totalPages ? page + 1 : null;
 
   return (
-    <nav className="pagination" aria-label="Topic pagination">
+    <nav className="pagination" aria-label={ariaLabel}>
       {previousPage ? (
         <Link className="pagination-link" href={buildPageHref(basePath, previousPage)}>
           Previous

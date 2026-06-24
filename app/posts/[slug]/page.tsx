@@ -106,7 +106,8 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
           <span className={`content-source ${contentSourceClass(post.source)}`}>
             {contentSourceLabel(post.source)}
           </span>
-          By {authorLabel(post.author)} · {formatDate(post.publishedAt ?? post.createdAt)}
+          By <Link href={`/u/${post.author.twitterHandle}`}>{authorLabel(post.author)}</Link> ·{" "}
+          {formatDate(post.publishedAt ?? post.createdAt)}
         </p>
         <div className="body-text">{post.body}</div>
       </article>
@@ -185,7 +186,7 @@ function CommentBranch({
           <span className={`content-source ${contentSourceClass(comment.source)}`}>
             {contentSourceLabel(comment.source)}
           </span>
-          {authorLabel(comment.author)} ·{" "}
+          <Link href={`/u/${comment.author.twitterHandle}`}>{authorLabel(comment.author)}</Link> ·{" "}
           {formatDate(comment.publishedAt ?? comment.createdAt)}
         </p>
         <div className="body-text small">{comment.body}</div>

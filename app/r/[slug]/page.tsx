@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createPost } from "@/app/actions";
 import { SubmitButton } from "@/components/auth-banner";
+import { PaginationControls } from "@/components/pagination-controls";
+import { PostList } from "@/components/post-list";
 import { authorLabel } from "@/lib/author-label";
-import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
 import { prisma } from "@/lib/prisma";
+import { getPostBrowserPage, parsePostPage } from "@/lib/post-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +19,13 @@ type TopicPageProps = {
   searchParams?: {
     auth?: string;
     submitted?: string;
+    page?: string;
   };
 };
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: TopicPageProps): Promise<Metadata> {
   const topic = await prisma.topic.findUnique({
     where: {
@@ -42,6 +46,10 @@ export async function generateMetadata({
   return {
     title: `${topic.name} · AltBook`,
     description: topic.description ?? `Posts in ${topic.name}.`,
+    robots: {
+      index: parsePostPage(searchParams?.page) === 1,
+      follow: true,
+    },
   };
 }
 
@@ -53,30 +61,25 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
       },
       include: {
         createdByAuthor: true,
-        posts: {
-          where: {
-            status: "APPROVED",
-          },
-          orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-          include: {
-            author: true,
-            _count: {
-              select: {
-                comments: {
-                  where: {
-                    status: "APPROVED",
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     }),
     getCurrentAuthor(),
   ]);
 
   if (!topic) {
+    notFound();
+  }
+
+  const page = parsePostPage(searchParams?.page);
+  const postPage = await getPostBrowserPage({
+    page,
+    where: {
+      topicId: topic.id,
+      status: "APPROVED",
+    },
+  });
+
+  if (page > postPage.totalPages) {
     notFound();
   }
 
@@ -93,7 +96,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
       {topic.createdByAuthor ? (
         <p className="meta">
           Created by{" "}
-          <Link href={`/authors/${topic.createdByAuthor.twitterHandle}/topics`}>
+          <Link href={`/u/${topic.createdByAuthor.twitterHandle}`}>
             {authorLabel(topic.createdByAuthor)}
           </Link>
         </p>
@@ -135,33 +138,17 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
       <section className="comments" aria-labelledby="topic-posts-title">
         <div className="section-heading">
           <h2 id="topic-posts-title">Posts</h2>
-          <p>{topic.posts.length} approved</p>
+          <p>{postPage.totalCount} approved</p>
         </div>
 
-        {topic.posts.length === 0 ? (
-          <div className="empty">No approved posts in this topic yet.</div>
-        ) : (
-          <div className="post-list">
-            {topic.posts.map((post) => (
-              <article className={`post-card ${contentSourceClass(post.source)}`} key={post.id}>
-                <div>
-                  <h3>
-                    <Link href={`/posts/${post.slug}`}>{post.title}</Link>
-                  </h3>
-                  <p className="meta meta-with-badge">
-                    <span className={`content-source ${contentSourceClass(post.source)}`}>
-                      {contentSourceLabel(post.source)}
-                    </span>
-                    By {authorLabel(post.author)} ·{" "}
-                    {formatDate(post.publishedAt ?? post.createdAt)} ·{" "}
-                    {post._count.comments} comments
-                  </p>
-                </div>
-                <p className="preview">{post.body}</p>
-              </article>
-            ))}
-          </div>
-        )}
+        <PostList emptyMessage="No approved posts in this topic yet." posts={postPage.posts} />
+
+        <PaginationControls
+          ariaLabel="Topic post pagination"
+          basePath={`/r/${topic.slug}`}
+          page={page}
+          totalPages={postPage.totalPages}
+        />
       </section>
     </main>
   );
@@ -189,11 +176,4 @@ function SubmissionStatus({ value }: { value?: string }) {
   }
 
   return null;
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }

@@ -23,6 +23,7 @@ type AuthorTopicsPageProps = {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: AuthorTopicsPageProps): Promise<Metadata> {
   const author = await prisma.author.findUnique({
     where: {
@@ -48,7 +49,7 @@ export async function generateMetadata({
     title: `${author.displayName} · Topics · AltBook`,
     description: `Topics created by ${authorLabel(author)}.`,
     robots: {
-      index: false,
+      index: parseTopicPage(searchParams?.page) === 1,
       follow: true,
     },
   };
@@ -91,7 +92,9 @@ export default async function AuthorTopicsPage({
         <p className="eyebrow">Author topics</p>
         <h1>{authorLabel(author)}</h1>
         <p className="intro">
-          Topics created by this author. <Link href="/">Back to AltBook</Link>
+          Topics created by this author.{" "}
+          <Link href={`/u/${author.twitterHandle}`}>View their posts</Link> ·{" "}
+          <Link href="/">Back to AltBook</Link>
         </p>
       </section>
 
@@ -108,6 +111,7 @@ export default async function AuthorTopicsPage({
         />
 
         <PaginationControls
+          ariaLabel="Author topic pagination"
           basePath={`/authors/${author.twitterHandle}/topics`}
           page={page}
           totalPages={topicPage.totalPages}

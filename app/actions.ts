@@ -25,6 +25,7 @@ export async function createPost(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath(`/r/${post.topic.slug}`);
+  revalidatePath(`/u/${author.twitterHandle}`);
   revalidatePath("/sitemap.xml");
 
   if (isApproved) {

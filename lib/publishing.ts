@@ -175,6 +175,11 @@ export async function updatePost(input: unknown) {
       title: true,
       body: true,
       publishedAt: true,
+      author: {
+        select: {
+          twitterHandle: true,
+        },
+      },
       topic: {
         select: {
           slug: true,
@@ -261,6 +266,11 @@ export async function deletePost(input: unknown) {
     select: {
       id: true,
       slug: true,
+      author: {
+        select: {
+          twitterHandle: true,
+        },
+      },
       topic: {
         select: {
           slug: true,
