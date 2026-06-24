@@ -7,7 +7,7 @@ import { PaginationControls } from "@/components/pagination-controls";
 import { PostList } from "@/components/post-list";
 import { authorLabel } from "@/lib/author-label";
 import { prisma } from "@/lib/prisma";
-import { getPostBrowserPage, parsePostPage } from "@/lib/post-browser";
+import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const dynamic = "force-dynamic";
