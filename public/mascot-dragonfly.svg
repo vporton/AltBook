@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">AltBook dragonfly mascot</title>
+  <desc id="desc">A stylized side-view green dragonfly with translucent wings.</desc>
+  <defs>
+    <linearGradient id="wing" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.48" stop-color="#d9f1e6" stop-opacity="0.58"/>
+      <stop offset="1" stop-color="#8bc7ad" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#1c3d2d"/>
+      <stop offset="0.36" stop-color="#2f7751"/>
+      <stop offset="0.68" stop-color="#4b9b65"/>
+      <stop offset="1" stop-color="#163526"/>
+    </linearGradient>
+    <linearGradient id="tail" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#24563b"/>
+      <stop offset="0.5" stop-color="#72b35f"/>
+      <stop offset="1" stop-color="#173224"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="36%" cy="34%" r="66%">
+      <stop offset="0" stop-color="#fff8ba"/>
+      <stop offset="0.28" stop-color="#d8ec7f"/>
+      <stop offset="0.78" stop-color="#1f5b45"/>
+      <stop offset="1" stop-color="#10241c"/>
+    </radialGradient>
+    <filter id="softShadow" x="-20%" y="-30%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#162219" flood-opacity="0.18"/>
+    </filter>
+    <pattern id="wingVeins" width="42" height="32" patternUnits="userSpaceOnUse">
+      <path d="M0 22 C12 10 26 6 42 3 M10 32 C18 20 28 13 42 10" fill="none" stroke="#2f7751" stroke-opacity="0.16" stroke-width="2"/>
+    </pattern>
+  </defs>
+
+  <ellipse cx="364" cy="240" rx="236" ry="80" fill="#217043" opacity="0.12"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M260 190 C320 82 468 34 616 70 C498 136 382 184 270 217 Z" fill="url(#wing)" stroke="#257148" stroke-opacity="0.34" stroke-width="3"/>
+    <path d="M272 210 C360 154 504 144 650 196 C508 235 394 247 280 232 Z" fill="url(#wing)" stroke="#257148" stroke-opacity="0.32" stroke-width="3"/>
+    <path d="M260 190 C320 82 468 34 616 70 C498 136 382 184 270 217 Z" fill="url(#wingVeins)" opacity="0.75"/>
+    <path d="M272 210 C360 154 504 144 650 196 C508 235 394 247 280 232 Z" fill="url(#wingVeins)" opacity="0.62"/>
+
+    <path d="M88 213 C95 188 116 171 143 174 C169 177 187 198 184 224 C181 249 159 267 132 263 C105 260 82 238 88 213 Z" fill="#1f4937"/>
+    <circle cx="109" cy="211" r="30" fill="url(#eye)" stroke="#10241c" stroke-width="4"/>
+    <circle cx="129" cy="197" r="10" fill="#f7f0a4" opacity="0.9"/>
+
+    <path d="M159 195 C190 160 260 162 286 200 C307 231 280 266 226 262 C178 259 137 229 159 195 Z" fill="url(#body)"/>
+    <path d="M260 205 C356 183 478 188 604 226 C493 260 369 258 258 234 C246 231 246 209 260 205 Z" fill="url(#tail)"/>
+
+    <path d="M304 198 L318 242 M352 197 L363 251 M402 201 L410 258 M452 208 L455 262 M504 218 L500 265 M552 232 L543 270" fill="none" stroke="#163526" stroke-opacity="0.5" stroke-linecap="round" stroke-width="7"/>
+    <path d="M602 225 L676 246 L598 257 Z" fill="#13291f"/>
+
+    <path d="M196 249 C178 278 161 296 137 306" fill="none" stroke="#163526" stroke-linecap="round" stroke-width="8"/>
+    <path d="M230 257 C220 292 209 312 187 331" fill="none" stroke="#163526" stroke-linecap="round" stroke-width="8"/>
+    <path d="M246 180 C227 150 212 132 186 119" fill="none" stroke="#163526" stroke-linecap="round" stroke-width="7"/>
+    <path d="M165 183 C153 160 141 145 120 136" fill="none" stroke="#163526" stroke-linecap="round" stroke-width="6"/>
+  </g>
+</svg>
