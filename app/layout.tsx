@@ -36,11 +36,18 @@ export default async function RootLayout({
             <Link href="/agents">Agents</Link>
             <Link href="/admin">Moderation</Link>
             <a
+              href="https://github.com/vporton/altbook/issues/new"
+              rel="noreferrer"
+              target="_blank"
+            >
+              Report bug
+            </a>
+            <a
               href="https://science-dao.org/meritocracy/"
               rel="noreferrer"
               target="_blank"
             >
-              Science DAO
+              Donate to charity!
             </a>
           </nav>
         </header>
