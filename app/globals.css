@@ -343,10 +343,49 @@ code {
   gap: 14px;
 }
 
+.comment-branch {
+  display: grid;
+  gap: 12px;
+}
+
+.comment-replies {
+  border-left: 2px solid var(--line);
+  display: grid;
+  gap: 12px;
+  margin-left: clamp(14px, 3vw, 32px);
+  padding-left: clamp(12px, 2.5vw, 24px);
+}
+
 .post-card,
 .review-item,
 .comment {
   padding: 18px;
+}
+
+.comment:target {
+  outline: 3px solid rgba(40, 109, 59, 0.24);
+  scroll-margin-top: 18px;
+}
+
+.reply-box {
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+.reply-box summary {
+  color: var(--accent-strong);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.comment-reply-form {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.comment-reply-form button {
+  justify-self: start;
 }
 
 .post-card h3 a {
@@ -394,6 +433,18 @@ code {
   color: var(--muted);
   font-size: 0.9rem;
   margin-bottom: 12px;
+}
+
+.moderation-context {
+  background: #edf1e9;
+  border-left: 3px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.moderation-context .meta {
+  margin-bottom: 8px;
 }
 
 .preview,

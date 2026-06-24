@@ -90,6 +90,7 @@ export const postDeleteSchema = z.object(postRefSchema).superRefine(requirePostR
 export const commentInputSchema = z
   .object({
     postId: z.string().min(1),
+    parentCommentId: z.string().trim().min(1).optional(),
     body: z.string().trim().min(3).max(4000),
     ...authorRefSchema,
   })
@@ -291,6 +292,23 @@ export async function createModeratedComment(input: unknown) {
       },
     }),
   ]);
+  const parentComment = payload.parentCommentId
+    ? await prisma.comment.findFirst({
+        where: {
+          id: payload.parentCommentId,
+          postId: post.id,
+          status: PublicationStatus.APPROVED,
+        },
+        select: {
+          id: true,
+        },
+      })
+    : null;
+
+  if (payload.parentCommentId && !parentComment) {
+    throw new PublishingInputError("Parent comment not found.", 404);
+  }
+
   const moderation = await moderateSubmission({
     kind: "comment",
     body: payload.body,
@@ -299,6 +317,7 @@ export async function createModeratedComment(input: unknown) {
   const comment = await prisma.comment.create({
     data: {
       postId: post.id,
+      parentId: parentComment?.id ?? null,
       authorId: author.id,
       body: payload.body,
       status: moderation.status,

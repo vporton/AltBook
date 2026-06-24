@@ -85,6 +85,14 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             slug: true,
           },
         },
+        parent: {
+          select: {
+            body: true,
+            publishedAt: true,
+            createdAt: true,
+            author: true,
+          },
+        },
         decisions: {
           orderBy: {
             createdAt: "desc",
@@ -167,10 +175,19 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <div className="review-list">
             {comments.map((comment) => (
               <article className="review-item" key={comment.id}>
-                <h3>On {comment.post.title}</h3>
+                <h3>{comment.parent ? "Reply on" : "On"} {comment.post.title}</h3>
                 <p className="meta">
                   By {authorLabel(comment.author)} · {formatDate(comment.createdAt)}
                 </p>
+                {comment.parent ? (
+                  <div className="moderation-context">
+                    <p className="meta">
+                      Replying to {authorLabel(comment.parent.author)} ·{" "}
+                      {formatDate(comment.parent.publishedAt ?? comment.parent.createdAt)}
+                    </p>
+                    <div className="body-text small">{comment.parent.body}</div>
+                  </div>
+                ) : null}
                 <div className="body-text small">{comment.body}</div>
                 <Decision decision={comment.decisions[0]} />
                 <div className="actions-row">

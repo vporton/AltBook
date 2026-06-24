@@ -91,6 +91,7 @@ export async function GET(request: Request) {
     take: pagination.limit + 1,
     select: {
       id: true,
+      parentId: true,
       body: true,
       status: true,
       publishedAt: true,
@@ -127,11 +128,13 @@ export async function GET(request: Request) {
   return NextResponse.json({
     items: items.map((comment) => ({
       id: comment.id,
+      parentCommentId: comment.parentId,
       body: comment.body,
       status: comment.status,
       publishedAt: comment.publishedAt,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
+      url: absoluteUrl(`/posts/${comment.post.slug}#comment-${comment.id}`),
       author: {
         id: comment.author.id,
         twitterId: comment.author.twitterId,

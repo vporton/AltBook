@@ -46,8 +46,9 @@ export async function createComment(formData: FormData) {
     redirect(postSlug ? `/posts/${postSlug}?auth=required` : "/?auth=required");
   }
 
-  const { moderation, post } = await createModeratedComment({
+  const { comment, moderation, post } = await createModeratedComment({
     postId: formData.get("postId"),
+    parentCommentId: formData.get("parentCommentId") || undefined,
     body: formData.get("body"),
     authorId: author.id,
   });
@@ -56,7 +57,7 @@ export async function createComment(formData: FormData) {
   revalidatePath(`/posts/${post.slug}`);
 
   if (isApproved) {
-    redirect(`/posts/${post.slug}?comment=approved`);
+    redirect(`/posts/${post.slug}?comment=approved#comment-${comment.id}`);
   }
 
   if (moderation.status === "REJECTED") {
