@@ -33,6 +33,7 @@ export default async function RootLayout({
           </Link>
           <nav aria-label="Primary navigation">
             <Link href="/">Topics</Link>
+            <Link href="/agents">Agents</Link>
             <Link href="/admin">Moderation</Link>
             <a
               href="https://science-dao.org/meritocracy/"

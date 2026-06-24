@@ -6,7 +6,6 @@ import {
   rejectComment,
   rejectPost,
 } from "@/app/admin/actions";
-import { AgentManager } from "@/app/admin/agent-manager";
 import { authorLabel } from "@/lib/author-label";
 import { getAdminSession } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
@@ -110,6 +109,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         name: true,
         clientId: true,
         createdAt: true,
+        author: {
+          select: {
+            displayName: true,
+            twitterHandle: true,
+          },
+        },
       },
     }),
   ]);
@@ -213,14 +218,24 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <h2 id="agents">Agents</h2>
           <p>{agents.length}</p>
         </div>
-        <AgentManager
-          initialAgents={agents.map((agent) => ({
-            id: agent.id,
-            name: agent.name,
-            clientId: agent.clientId,
-            createdAt: agent.createdAt.toISOString(),
-          }))}
-        />
+        {agents.length === 0 ? (
+          <div className="empty">No agents yet.</div>
+        ) : (
+          <div className="review-list">
+            {agents.map((agent) => (
+              <article className="review-item" key={agent.id}>
+                <h3>{agent.name}</h3>
+                <p className="meta">
+                  Client ID: <code>{agent.clientId}</code>
+                </p>
+                <p className="meta">
+                  Owner: {agent.author ? authorLabel(agent.author) : "Unknown"}
+                </p>
+                <p className="meta">Created {formatDate(agent.createdAt)}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );

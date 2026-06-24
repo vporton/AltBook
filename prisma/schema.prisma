@@ -21,6 +21,7 @@ model Author {
   avatarUrl     String?
   posts         Post[]
   comments      Comment[]
+  agents        Agent[]
   createdTopics Topic[]   @relation("TopicCreator")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -29,6 +30,8 @@ model Author {
 model Agent {
   id                    String   @id @default(cuid())
   name                  String
+  authorId              String
+  author                Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   clientId              String   @unique
   clientSecretHash      String
   accessTokenHash       String?  @unique
@@ -36,6 +39,7 @@ model Agent {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
+  @@index([authorId, createdAt])
   @@index([createdAt])
 }
 

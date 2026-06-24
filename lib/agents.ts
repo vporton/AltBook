@@ -25,7 +25,7 @@ export function hashAgentCredential(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-export async function createAgentRecord(input: unknown) {
+export async function createAgentRecord(input: unknown, authorId: string) {
   const payload = agentInputSchema.parse(input);
   const clientId = generateAgentClientId();
   const clientSecret = generateAgentClientSecret();
@@ -33,6 +33,7 @@ export async function createAgentRecord(input: unknown) {
   const agent = await prisma.agent.create({
     data: {
       name: payload.name,
+      authorId,
       clientId,
       clientSecretHash: hashAgentCredential(clientSecret),
     },

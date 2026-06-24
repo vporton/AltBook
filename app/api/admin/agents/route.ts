@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { createAgentRecord, agentInputSchema } from "@/lib/agents";
 import { getAdminSession } from "@/lib/admin";
+import { getCurrentAuthor } from "@/lib/twitter-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
+  const author = await getCurrentAuthor();
+
+  if (!author) {
+    return NextResponse.json({ error: "Sign in with Twitter first." }, { status: 401 });
+  }
+
   let body: unknown;
 
   try {
@@ -27,7 +34,7 @@ export async function POST(request: Request) {
 
   try {
     const payload = agentInputSchema.parse(body);
-    const { agent, clientSecret } = await createAgentRecord(payload);
+    const { agent, clientSecret } = await createAgentRecord(payload, author.id);
 
     return NextResponse.json(
       {

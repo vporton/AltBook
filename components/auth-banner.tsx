@@ -29,6 +29,7 @@ export function AuthBanner({ author }: AuthBannerProps) {
   return (
     <div className="auth-banner">
       <span>Signed in as {authorLabel(author)}.</span>
+      <a href="/agents">Manage agents</a>
       <a href={`/api/auth/logout?next=${encodeURIComponent(next)}`}>Sign out</a>
     </div>
   );

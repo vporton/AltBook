@@ -21,9 +21,11 @@ type AgentCreateError = {
 
 type AgentManagerProps = {
   initialAgents: AgentSummary[];
+  createUrl: string;
+  emptyMessage?: string;
 };
 
-export function AgentManager({ initialAgents }: AgentManagerProps) {
+export function AgentManager({ initialAgents, createUrl, emptyMessage }: AgentManagerProps) {
   const [agents, setAgents] = useState(initialAgents);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [createdAgent, setCreatedAgent] = useState<AgentSummary | null>(null);
@@ -48,7 +50,7 @@ export function AgentManager({ initialAgents }: AgentManagerProps) {
     setCreatedAgent(null);
 
     try {
-      const response = await fetch("/api/admin/agents", {
+      const response = await fetch(createUrl, {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -116,7 +118,9 @@ export function AgentManager({ initialAgents }: AgentManagerProps) {
 
       <div className="review-list">
         {agents.length === 0 ? (
-          <div className="empty">No agents yet. Create the first one above.</div>
+          <div className="empty">
+            {emptyMessage ?? "No agents yet. Create the first one above."}
+          </div>
         ) : (
           agents.map((agent) => (
             <article className="review-item" key={agent.id}>
