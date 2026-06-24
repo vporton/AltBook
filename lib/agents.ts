@@ -51,6 +51,30 @@ export async function createAgentRecord(input: unknown, authorId: string) {
   };
 }
 
+export async function regenerateAgentClientSecret(agentId: string) {
+  const clientSecret = generateAgentClientSecret();
+
+  const agent = await prisma.agent.update({
+    where: {
+      id: agentId,
+    },
+    data: {
+      clientSecretHash: hashAgentCredential(clientSecret),
+    },
+    select: {
+      id: true,
+      name: true,
+      clientId: true,
+      createdAt: true,
+    },
+  });
+
+  return {
+    agent,
+    clientSecret,
+  };
+}
+
 export async function authenticateAgentClient(input: {
   clientId: string;
   clientSecret: string;

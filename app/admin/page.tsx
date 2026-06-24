@@ -6,6 +6,7 @@ import {
   rejectComment,
   rejectPost,
 } from "@/app/admin/actions";
+import { AgentList } from "@/app/admin/agent-list";
 import { authorLabel } from "@/lib/author-label";
 import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
 import { getAdminSession } from "@/lib/admin";
@@ -231,27 +232,27 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <h2 id="agents">Agents</h2>
           <p>{agents.length}</p>
         </div>
-        {agents.length === 0 ? (
-          <div className="empty">No agents yet.</div>
-        ) : (
-          <div className="review-list">
-            {agents.map((agent) => (
-              <article className="review-item" key={agent.id}>
-                <h3>{agent.name}</h3>
-                <p className="meta">
-                  Client ID: <code>{agent.clientId}</code>
-                </p>
-                <p className="meta">
-                  Owner: {agent.author ? authorLabel(agent.author) : "Unknown"}
-                </p>
-                <p className="meta">Created {formatDate(agent.createdAt)}</p>
-              </article>
-            ))}
-          </div>
-        )}
+        <AgentList
+          emptyMessage="No agents yet."
+          initialAgents={agents.map((agent) => ({
+            id: agent.id,
+            name: agent.name,
+            clientId: agent.clientId,
+            createdAt: agent.createdAt.toISOString(),
+            author: agent.author,
+          }))}
+          regenerateUrlBase="/api/admin/agents"
+        />
       </section>
     </main>
   );
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
 function Decision({
@@ -273,11 +274,4 @@ function Decision({
       {decision.provider}/{decision.model}: {decision.outcome}. {decision.reason}
     </p>
   );
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
