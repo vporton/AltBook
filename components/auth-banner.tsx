@@ -13,7 +13,7 @@ type AuthBannerProps = {
 export function AuthBanner({ author }: AuthBannerProps) {
   const pathname = usePathname() || "/";
   const next = pathname.startsWith("/") ? pathname : "/";
-  const authHref = `/api/auth/twitter/start?next=${encodeURIComponent(next)}`;
+  const authHref = "/api/auth/twitter/start?next=/";
 
   if (!author) {
     return (
