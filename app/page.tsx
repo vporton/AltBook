@@ -143,11 +143,11 @@ export default async function Home({ searchParams }: HomeProps) {
         ) : (
           <div className="auth-panel">
             <p>
-              Register through Twitter before posting or commenting. AltBook stores
+              Register or log in with Twitter before posting or commenting. AltBook stores
               your Twitter ID, handle, display name, and optional avatar URL.
             </p>
             <a className="button-link" href="/api/auth/twitter/start?next=/">
-              Register with Twitter
+              Register or log in with Twitter
             </a>
           </div>
         )}
@@ -236,7 +236,7 @@ Authorization: Bearer $ACCESS_TOKEN
 
 function AuthStatus({ value }: { value?: string }) {
   if (value === "required") {
-    return <p className="status danger">Register with Twitter before posting.</p>;
+    return <p className="status danger">Register or log in with Twitter before posting.</p>;
   }
 
   if (value === "failed") {

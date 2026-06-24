@@ -7,12 +7,22 @@ type AuthBannerProps = {
   author: {
     displayName: string;
     twitterHandle: string;
-  };
+  } | null;
 };
 
 export function AuthBanner({ author }: AuthBannerProps) {
   const pathname = usePathname() || "/";
   const next = pathname.startsWith("/") ? pathname : "/";
+  const authHref = `/api/auth/twitter/start?next=${encodeURIComponent(next)}`;
+
+  if (!author) {
+    return (
+      <div className="auth-banner">
+        <span>Register or log in with Twitter to post and comment.</span>
+        <a href={authHref}>Register or log in with Twitter</a>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-banner">

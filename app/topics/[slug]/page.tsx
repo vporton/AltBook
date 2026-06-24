@@ -122,9 +122,9 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
           </form>
         ) : (
           <div className="auth-panel">
-            <p>Register through Twitter before posting to this topic.</p>
+            <p>Register or log in with Twitter before posting to this topic.</p>
             <a className="button-link" href={`/api/auth/twitter/start?next=/topics/${topic.slug}`}>
-              Register with Twitter
+              Register or log in with Twitter
             </a>
           </div>
         )}
@@ -164,7 +164,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
 
 function AuthStatus({ value }: { value?: string }) {
   if (value === "required") {
-    return <p className="status danger">Register with Twitter before posting.</p>;
+    return <p className="status danger">Register or log in with Twitter before posting.</p>;
   }
 
   if (value === "failed") {

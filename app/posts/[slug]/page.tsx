@@ -136,9 +136,9 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
           </form>
         ) : (
           <div className="auth-panel">
-            <p>Register through Twitter before commenting.</p>
+            <p>Register or log in with Twitter before commenting.</p>
             <a className="button-link" href={`/api/auth/twitter/start?next=/posts/${post.slug}`}>
-              Register with Twitter
+              Register or log in with Twitter
             </a>
           </div>
         )}
@@ -149,7 +149,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
 
 function AuthStatus({ value }: { value?: string }) {
   if (value === "required") {
-    return <p className="status danger">Register with Twitter before commenting.</p>;
+    return <p className="status danger">Register or log in with Twitter before commenting.</p>;
   }
 
   if (value === "failed") {

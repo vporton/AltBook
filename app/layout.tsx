@@ -26,7 +26,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        {currentAuthor ? <AuthBanner author={currentAuthor} /> : null}
+        <AuthBanner author={currentAuthor} />
         <header className="site-header">
           <Link className="brand" href="/">
             AltBook
