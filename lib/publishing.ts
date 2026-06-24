@@ -9,15 +9,17 @@ const authorRefSchema = {
   authorTwitterId: z.string().trim().min(1).max(80).optional(),
 };
 
+const topicSlugPattern = /^[a-z]+(?:_[a-z]+)*$/;
+const topicSlugSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(80)
+  .regex(topicSlugPattern);
+
 const topicRefSchema = {
   topicId: z.string().trim().min(1).optional(),
-  topicSlug: z
-    .string()
-    .trim()
-    .min(1)
-    .max(80)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-    .optional(),
+  topicSlug: topicSlugSchema.optional(),
 };
 
 const postRefSchema = {
@@ -103,13 +105,7 @@ export const commentInputSchema = z
 
 export const topicInputSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  slug: z
-    .string()
-    .trim()
-    .min(1)
-    .max(80)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-    .optional(),
+  slug: topicSlugSchema.optional(),
   description: z.string().trim().max(300).optional().or(z.literal("")),
   ...authorRefSchema,
 });
