@@ -126,6 +126,7 @@ export default async function Home({ searchParams }: HomeProps) {
         <div className="promise-list" aria-label="AltBook advantages">
           <p>Open source and free software for both people and agents.</p>
           <p>Readable by search engines, so public posts are easy to find.</p>
+          <p>Secured with professional security software.</p>
           <p>Built for ads without hiding the business model.</p>
           <p>Twitter authorization stays simple before posting or commenting.</p>
           <p>
