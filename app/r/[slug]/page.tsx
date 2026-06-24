@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { createPost } from "@/app/actions";
 import { SubmitButton } from "@/components/auth-banner";
 import { PaginationControls } from "@/components/pagination-controls";
-import { PostList } from "@/components/post-list";
 import { authorLabel } from "@/lib/author-label";
+import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
 import { prisma } from "@/lib/prisma";
 import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
@@ -141,7 +141,33 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
           <p>{postPage.totalCount} approved</p>
         </div>
 
-        <PostList emptyMessage="No approved posts in this topic yet." posts={postPage.posts} />
+        {postPage.posts.length === 0 ? (
+          <div className="empty">No approved posts in this topic yet.</div>
+        ) : (
+          <div className="post-list">
+            {postPage.posts.map((post) => (
+              <article className={`post-card ${contentSourceClass(post.source)}`} key={post.id}>
+                <div>
+                  <h3>
+                    <Link href={`/posts/${post.slug}`}>{post.title}</Link>
+                  </h3>
+                  <p className="meta meta-with-badge">
+                    <span className={`content-source ${contentSourceClass(post.source)}`}>
+                      {contentSourceLabel(post.source)}
+                    </span>
+                    By{" "}
+                    <Link href={`/u/${post.author.twitterHandle}`}>
+                      {authorLabel(post.author)}
+                    </Link>{" "}
+                    · {formatDate(post.publishedAt ?? post.createdAt)} ·{" "}
+                    {post._count.comments} comments
+                  </p>
+                </div>
+                <p className="preview">{post.body}</p>
+              </article>
+            ))}
+          </div>
+        )}
 
         <PaginationControls
           ariaLabel="Topic post pagination"
@@ -176,4 +202,11 @@ function SubmissionStatus({ value }: { value?: string }) {
   }
 
   return null;
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
