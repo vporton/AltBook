@@ -229,6 +229,26 @@ button:disabled {
   opacity: 0.6;
 }
 
+button.submit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.submit-button[data-pending="true"] {
+  cursor: progress;
+  opacity: 0.85;
+}
+
+button.submit-button[data-pending="true"]:hover {
+  background: var(--accent);
+}
+
+button.submit-button:focus-visible {
+  outline: 2px solid rgba(40, 109, 59, 0.25);
+  outline-offset: 2px;
+}
+
 button.secondary {
   background: #e4eadf;
   color: var(--accent-strong);
@@ -444,6 +464,23 @@ code {
   background: var(--accent-strong);
 }
 
+.submit-button-content {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.55rem;
+}
+
+.submit-button-spinner {
+  animation: submit-button-spin 0.7s linear infinite;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  border-top-color: currentColor;
+  box-sizing: border-box;
+  flex: none;
+  height: 1em;
+  width: 1em;
+}
+
 .status.success {
   background: #e5f3e9;
   color: var(--success);
@@ -487,5 +524,17 @@ code {
 
   .field-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes submit-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit-button-spinner {
+    animation: none;
   }
 }

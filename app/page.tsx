@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createPost } from "@/app/actions";
 import { PaginationControls } from "@/components/pagination-controls";
+import { SubmitButton } from "@/components/submit-button";
 import { TopicList } from "@/components/topic-list";
 import { prisma } from "@/lib/prisma";
 import { getTopicBrowserPage, parseTopicPage } from "@/lib/topic-browser";
@@ -132,9 +133,9 @@ export default async function Home({ searchParams }: HomeProps) {
               Post
               <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
             </label>
-            <button type="submit" disabled={allTopics.length === 0}>
+            <SubmitButton disabled={allTopics.length === 0} pendingLabel="Posting...">
               Submit post
-            </button>
+            </SubmitButton>
           </form>
         ) : currentAuthor ? (
           <div className="status danger">

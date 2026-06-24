@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createPost } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 import { authorLabel } from "@/lib/author-label";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
@@ -118,7 +119,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
               Post
               <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
             </label>
-            <button type="submit">Submit post</button>
+            <SubmitButton pendingLabel="Posting...">Submit post</SubmitButton>
           </form>
         ) : (
           <div className="auth-panel">
