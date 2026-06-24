@@ -179,10 +179,6 @@ function SubmissionStatus({ value }: { value?: string }) {
     return <p className="status success">Your post is live.</p>;
   }
 
-  if (value === "review") {
-    return <p className="status">Your post is waiting for moderation review.</p>;
-  }
-
   if (value === "rejected") {
     return <p className="status danger">The post did not pass moderation.</p>;
   }

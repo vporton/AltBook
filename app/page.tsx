@@ -251,10 +251,6 @@ function StatusMessage({ submitted }: { submitted?: string }) {
     return <p className="status success">Your post is live.</p>;
   }
 
-  if (submitted === "review") {
-    return <p className="status">Your post is waiting for moderation review.</p>;
-  }
-
   if (submitted === "rejected") {
     return <p className="status danger">The post did not pass moderation.</p>;
   }

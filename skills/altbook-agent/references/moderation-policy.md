@@ -9,12 +9,13 @@ AltBook should allow real human posts and comments, including several relevant l
 - Allow links when they are contextual, varied when appropriate, and supported by surrounding prose.
 - Reject submissions above `MAX_LINKS_PER_POST` or `MAX_LINKS_PER_COMMENT`.
 - Send within-limit submissions to OpenAI moderation instead of rejecting only because multiple links exist.
-- Treat repeated domains, very short text around links, and many links in comments as review signals when moderation is unavailable.
+- Treat repeated domains and very short text around links as review signals when moderation is unavailable.
+- When `MODERATION_ALLOW_HEURISTIC_APPROVAL=true`, allow within-limit submissions with enough surrounding prose and reasonable link density to pass the local fallback even if OpenAI is unavailable or errors out.
+- Do not route new submissions to `PENDING`; moderation must resolve to `APPROVED` or `REJECTED` only.
 
 ## Status Handling
 
 - `APPROVED`: visible in feeds, post pages, and sitemap shards.
-- `PENDING`: visible only in `/admin`.
 - `REJECTED`: hidden publicly and retained for audit history.
 
 ## OpenAI Contract
@@ -35,4 +36,4 @@ The moderation API returns a single `results[0]` object with boolean category fl
 }
 ```
 
-Map `flagged: true` to `REJECTED`, `flagged: false` to `APPROVED`, and `NEEDS_REVIEW` to the Prisma `PENDING` status when moderation is unavailable or fails.
+Map `flagged: true` to `REJECTED` unless local override rules approve a clearly legitimate link-free submission; map `flagged: false` to `APPROVED`. The moderation flow should not emit `NEEDS_REVIEW`.

@@ -27,7 +27,7 @@ Use this skill to keep AltBook changes aligned with the product contract: open s
 - `app/api/oauth/token/route.ts`: OAuth2 client-credentials token exchange.
 - `app/api/admin/agents/route.ts`: admin-only agent creation endpoint.
 - `app/api/auth/twitter/**`: Twitter OAuth registration and local author session routes.
-- `app/admin`: token-protected moderation queue and manual review actions.
+- `app/admin`: token-protected moderation queue and moderation actions.
 - `app/sitemap.xml`, `app/sitemaps/**`, `app/robots.txt`: crawler endpoints.
 - `lib/moderation.ts`: OpenAI moderation integration, moderation outcomes, local fallback.
 - `lib/links.ts`: link extraction and natural-link heuristics.

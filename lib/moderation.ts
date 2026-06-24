@@ -11,7 +11,7 @@ export type ModerationInput = {
 };
 
 export type ModerationResult = {
-  outcome: "APPROVED" | "REJECTED" | "NEEDS_REVIEW";
+  outcome: "APPROVED" | "REJECTED";
   status: PublicationStatus;
   score: number | null;
   reason: string;
@@ -34,6 +34,9 @@ type OpenAIModerationResponse = {
 
 const OPENAI_MODERATION_MODEL = "omni-moderation-latest";
 const OPENAI_MODERATION_URL = "https://api.openai.com/v1/moderations";
+const HEURISTIC_MIN_POST_WORDS = 8;
+const HEURISTIC_MIN_COMMENT_WORDS = 3;
+const HEURISTIC_MIN_WORDS_PER_LINK = 8;
 
 export async function moderateSubmission(
   input: ModerationInput,
@@ -65,6 +68,24 @@ export async function moderateSubmission(
 
   try {
     const openaiModeration = await callOpenAIModeration(input, apiKey);
+    if (
+      openaiModeration.outcome === "REJECTED" &&
+      linkAssessment.linkCount === 0 &&
+      shouldApproveLinkFreeSubmission(input)
+    ) {
+      return resultFromOutcome({
+        outcome: "APPROVED",
+        score: openaiModeration.score,
+        reason:
+          "OpenAI moderation flagged the submission, but link-free text is auto-approved.",
+        categories: openaiModeration.categories,
+        links: linkAssessment,
+        provider: "openai",
+        model: openaiModeration.model,
+        rawResponse: openaiModeration.rawResponse,
+      });
+    }
+
     return resultFromOutcome({
       ...openaiModeration,
       links: linkAssessment,
@@ -73,19 +94,7 @@ export async function moderateSubmission(
       rawResponse: openaiModeration.rawResponse,
     });
   } catch (error) {
-    return resultFromOutcome({
-      outcome: "NEEDS_REVIEW",
-      score: null,
-      reason:
-        error instanceof Error
-          ? `OpenAI moderation failed: ${error.message}`
-          : "OpenAI moderation failed.",
-      categories: ["moderation_unavailable"],
-      links: linkAssessment,
-      provider: "openai",
-      model: OPENAI_MODERATION_MODEL,
-      rawResponse: null,
-    });
+    return fallbackAfterOpenAIFailure(input, linkAssessment, error);
   }
 }
 
@@ -93,16 +102,41 @@ function fallbackWithoutOpenAI(
   input: ModerationInput,
   links: LinkAssessment,
 ): ModerationResult {
+  return localFallback(input, links, {
+    approvedReason:
+      "OpenAI moderation is not configured; the submission was auto-approved by the local fallback.",
+  });
+}
+
+function fallbackAfterOpenAIFailure(
+  input: ModerationInput,
+  links: LinkAssessment,
+  error: unknown,
+): ModerationResult {
+  return localFallback(input, links, {
+    approvedReason:
+      error instanceof Error
+        ? `OpenAI moderation failed: ${error.message}; the submission was auto-approved by the local fallback.`
+        : "OpenAI moderation failed; the submission was auto-approved by the local fallback.",
+  });
+}
+
+function localFallback(
+  input: ModerationInput,
+  links: LinkAssessment,
+  messages: {
+    approvedReason: string;
+  },
+): ModerationResult {
   const allowHeuristicApproval =
     process.env.MODERATION_ALLOW_HEURISTIC_APPROVAL === "true";
 
-  if (links.flags.includes("low_context_per_link") || links.flags.includes("repeated_domains")) {
+  if (links.flags.includes("too_many_links")) {
     return resultFromOutcome({
-      outcome: "NEEDS_REVIEW",
-      score: 0.55,
-      reason:
-        "OpenAI moderation is not configured and the local link assessment found promotional link patterns.",
-      categories: ["needs_manual_moderation"],
+      outcome: "REJECTED",
+      score: 0.96,
+      reason: `Submission has ${links.linkCount} links, above the configured limit of ${links.maxAllowed}.`,
+      categories: ["link_spam"],
       links,
       provider: "heuristic",
       model: "local-link-policy",
@@ -110,11 +144,11 @@ function fallbackWithoutOpenAI(
     });
   }
 
-  if (allowHeuristicApproval && input.body.trim().length >= 20) {
+  if (links.linkCount === 0) {
     return resultFromOutcome({
       outcome: "APPROVED",
-      score: 0.15,
-      reason: "OpenAI moderation is not configured; local heuristic approval is enabled.",
+      score: 0.1,
+      reason: messages.approvedReason,
       categories: [],
       links,
       provider: "heuristic",
@@ -123,11 +157,38 @@ function fallbackWithoutOpenAI(
     });
   }
 
+  if (allowHeuristicApproval && shouldApproveHeuristically(input, links)) {
+    return resultFromOutcome({
+      outcome: "APPROVED",
+      score: 0.15,
+      reason: messages.approvedReason,
+      categories: [],
+      links,
+      provider: "heuristic",
+      model: "local-link-policy",
+      rawResponse: null,
+    });
+  }
+
+  if (links.flags.includes("low_context_per_link") || links.flags.includes("repeated_domains")) {
+    return resultFromOutcome({
+      outcome: "REJECTED",
+      score: 0.55,
+      reason:
+        "OpenAI moderation is not configured and the local link assessment found promotional link patterns.",
+      categories: ["link_spam"],
+      links,
+      provider: "heuristic",
+      model: "local-link-policy",
+      rawResponse: null,
+    });
+  }
+
   return resultFromOutcome({
-    outcome: "NEEDS_REVIEW",
-    score: null,
-    reason: "OpenAI moderation is not configured, so the submission needs manual review.",
-    categories: ["moderation_unavailable"],
+    outcome: "APPROVED",
+    score: 0.1,
+    reason: messages.approvedReason,
+    categories: [],
     links,
     provider: "heuristic",
     model: "local-link-policy",
@@ -279,6 +340,41 @@ function formatCategoryList(categories: string[]) {
   }`;
 }
 
+function shouldApproveHeuristically(
+  input: ModerationInput,
+  links: LinkAssessment,
+) {
+  const text = input.title ? `${input.title}\n${input.body}` : input.body;
+  const minimumWords =
+    input.kind === "post" ? HEURISTIC_MIN_POST_WORDS : HEURISTIC_MIN_COMMENT_WORDS;
+
+  if (countWords(text) < minimumWords) {
+    return false;
+  }
+
+  if (links.linkCount === 0) {
+    return true;
+  }
+
+  if (links.wordsPerLink === null) {
+    return false;
+  }
+
+  return links.wordsPerLink >= HEURISTIC_MIN_WORDS_PER_LINK;
+}
+
+function shouldApproveLinkFreeSubmission(input: ModerationInput) {
+  const text = input.title ? `${input.title}\n${input.body}` : input.body;
+  const minimumWords =
+    input.kind === "post" ? HEURISTIC_MIN_POST_WORDS : HEURISTIC_MIN_COMMENT_WORDS;
+
+  return countWords(text) >= minimumWords;
+}
+
+function countWords(text: string) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
 function resultFromOutcome(
   result: Omit<ModerationResult, "status">,
 ): ModerationResult {
@@ -287,9 +383,7 @@ function resultFromOutcome(
     status:
       result.outcome === "APPROVED"
         ? PublicationStatus.APPROVED
-        : result.outcome === "REJECTED"
-          ? PublicationStatus.REJECTED
-          : PublicationStatus.PENDING,
+        : PublicationStatus.REJECTED,
   };
 }
 

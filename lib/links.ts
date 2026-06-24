@@ -58,11 +58,11 @@ export function assessLinks(text: string, maxAllowed: number): LinkAssessment {
     flags.push("too_many_links");
   }
 
-  if (links.length > 0 && wordsPerLink !== null && wordsPerLink < 12) {
+  if (links.length > 0 && wordsPerLink !== null && wordsPerLink < 8) {
     flags.push("low_context_per_link");
   }
 
-  if (repeatedHostnames.length > 0 && links.length > 2) {
+  if (repeatedHostnames.length > 0 && links.length > 3) {
     flags.push("repeated_domains");
   }
 

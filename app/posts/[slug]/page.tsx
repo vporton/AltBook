@@ -164,10 +164,6 @@ function CommentStatus({ value }: { value?: string }) {
     return <p className="status success">Your comment is live.</p>;
   }
 
-  if (value === "review") {
-    return <p className="status">Your comment is waiting for moderation review.</p>;
-  }
-
   if (value === "rejected") {
     return <p className="status danger">The comment did not pass moderation.</p>;
   }

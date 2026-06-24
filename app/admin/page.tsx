@@ -111,7 +111,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <div className="admin-heading">
         <div>
           <p className="eyebrow">Moderation</p>
-          <h1>Review Queue</h1>
+          <h1>Moderation Queue</h1>
         </div>
         <form action={adminLogout}>
           <button className="secondary" type="submit">

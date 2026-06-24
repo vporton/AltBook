@@ -63,7 +63,7 @@ Set these variables to enable moderation:
 OPENAI_API_KEY="..."
 ```
 
-When `OPENAI_API_KEY` is absent, submissions are held for manual review unless `MODERATION_ALLOW_HEURISTIC_APPROVAL=true`.
+When `OPENAI_API_KEY` is absent, submissions use the local fallback instead of a review queue. `MODERATION_ALLOW_HEURISTIC_APPROVAL=true` lets the app apply a lightweight local pass for contextual submissions with reasonable link density. The same local pass is also used if OpenAI moderation errors. Link-free submissions are auto-approved unless they are hard-rejected for other reasons.
 
 Configure `ADMIN_TOKEN` to enable `/admin`.
 
