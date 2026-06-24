@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AgentManager } from "@/app/admin/agent-manager";
+import { AgentManager } from "@/components/agent-manager";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 

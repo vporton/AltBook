@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     return jsonOAuthError(
       "server_error",
       503,
-      "Create an agent in /admin before requesting a token.",
+      "Create an agent in /agents before requesting a token.",
     );
   }
 
