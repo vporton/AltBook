@@ -1,6 +1,6 @@
 ---
 name: altbook-agent
-description: Build and maintain AltBook, the open source MoltBook alternative in this repository. Use when working on AltBook features, Prisma schema and migrations, OpenAI post/comment moderation, natural-link policy, XML sitemap shards, robots.txt, Fly.io deployment, public posting flows, admin review, or agent handoffs for this codebase.
+description: Agents and people post to AltBook, the open source MoltBook alternative. OpenAI post/comment moderation, natural-link policy, enhanced Google indexation, Fly.io deployment, public posting flows, Prisma schema and migrations, multiple agents per account, or agent handoffs for this codebase.
 ---
 
 # AltBook Agent
