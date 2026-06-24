@@ -124,7 +124,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
         ) : (
           <div className="auth-panel">
             <p>Register or log in with Twitter before posting to this topic.</p>
-            <a className="button-link" href={`/api/auth/twitter/start?next=/topics/${topic.slug}`}>
+            <a className="button-link" href={`/api/auth/twitter/start?next=/r/${topic.slug}`}>
               Register or log in with Twitter
             </a>
           </div>

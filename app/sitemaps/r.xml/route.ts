@@ -11,7 +11,7 @@ export async function GET() {
     const shardCount = Math.ceil(topicCount / SITEMAP_URL_LIMIT);
     const sitemapUrls = Array.from(
       { length: shardCount },
-      (_, index) => absoluteUrl(`/sitemaps/topics/${index}.xml`),
+      (_, index) => absoluteUrl(`/sitemaps/r/${index}.xml`),
     );
     const body = xmlDocument(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapUrls
@@ -34,7 +34,7 @@ export async function GET() {
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${topics
       .map(
         (topic) =>
-          `<url><loc>${escapeXml(absoluteUrl(`/topics/${topic.slug}`))}</loc><lastmod>${topic.updatedAt.toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
+          `<url><loc>${escapeXml(absoluteUrl(`/r/${topic.slug}`))}</loc><lastmod>${topic.updatedAt.toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
       )
       .join("")}</urlset>`,
   );

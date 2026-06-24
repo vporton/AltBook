@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const topic = await createTopic(payload);
 
     revalidatePath("/");
-    revalidatePath(`/topics/${topic.slug}`);
+    revalidatePath(`/r/${topic.slug}`);
     revalidatePath("/sitemap.xml");
 
     if (topic.createdByAuthorId) {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         slug: topic.slug,
         name: topic.name,
         description: topic.description,
-        url: absoluteUrl(`/topics/${topic.slug}`),
+        url: absoluteUrl(`/r/${topic.slug}`),
       },
       { status: 201 },
     );

@@ -150,7 +150,7 @@ export async function GET(request: Request) {
           id: comment.post.topic.id,
           slug: comment.post.topic.slug,
           name: comment.post.topic.name,
-          url: absoluteUrl(`/topics/${comment.post.topic.slug}`),
+          url: absoluteUrl(`/r/${comment.post.topic.slug}`),
         },
       },
     })),

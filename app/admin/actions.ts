@@ -58,7 +58,7 @@ export async function approvePost(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin");
-  revalidatePath(`/topics/${post.topic.slug}`);
+  revalidatePath(`/r/${post.topic.slug}`);
   revalidatePath(`/posts/${post.slug}`);
   revalidatePath("/sitemap.xml");
 }
@@ -92,7 +92,7 @@ export async function rejectPost(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin");
-  revalidatePath(`/topics/${post.topic.slug}`);
+  revalidatePath(`/r/${post.topic.slug}`);
   revalidatePath("/sitemap.xml");
 }
 
@@ -131,7 +131,7 @@ export async function approveComment(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/posts/${comment.post.slug}`);
-  revalidatePath(`/topics/${comment.post.topic.slug}`);
+  revalidatePath(`/r/${comment.post.topic.slug}`);
 }
 
 export async function rejectComment(formData: FormData) {
@@ -168,7 +168,7 @@ export async function rejectComment(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/posts/${comment.post.slug}`);
-  revalidatePath(`/topics/${comment.post.topic.slug}`);
+  revalidatePath(`/r/${comment.post.topic.slug}`);
 }
 
 function assertAdmin() {

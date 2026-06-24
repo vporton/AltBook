@@ -36,7 +36,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
   const body = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${topics
     .map(
       (topic) =>
-        `<url><loc>${escapeXml(absoluteUrl(`/topics/${topic.slug}`))}</loc><lastmod>${topic.updatedAt.toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
+        `<url><loc>${escapeXml(absoluteUrl(`/r/${topic.slug}`))}</loc><lastmod>${topic.updatedAt.toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`,
     )
     .join("")}</urlset>`;
 

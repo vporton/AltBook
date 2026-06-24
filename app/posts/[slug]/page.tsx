@@ -97,7 +97,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
     <main className="content-page">
       <article className="post-full">
         <p className="eyebrow">
-          <Link href={`/topics/${post.topic.slug}`}>{post.topic.name}</Link>
+          <Link href={`/r/${post.topic.slug}`}>{post.topic.name}</Link>
         </p>
         <h1>{post.title}</h1>
         <p className="meta">

@@ -23,7 +23,7 @@ export function TopicList({
         <article className="post-card" key={topic.id}>
           <div>
             <h3>
-              <Link href={`/topics/${topic.slug}`}>{topic.name}</Link>
+              <Link href={`/r/${topic.slug}`}>{topic.name}</Link>
             </h3>
             <p className="meta">
               {topic._count.posts} approved{" "}

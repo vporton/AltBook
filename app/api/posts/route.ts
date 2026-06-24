@@ -129,7 +129,7 @@ export async function GET(request: Request) {
         id: post.topic.id,
         slug: post.topic.slug,
         name: post.topic.name,
-        url: absoluteUrl(`/topics/${post.topic.slug}`),
+        url: absoluteUrl(`/r/${post.topic.slug}`),
       },
       author: {
         id: post.author.id,
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     const { post, moderation } = await createModeratedPost(payload);
 
     revalidatePath("/");
-    revalidatePath(`/topics/${post.topic.slug}`);
+    revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath("/sitemap.xml");
 
     if (post.status === PublicationStatus.APPROVED) {
@@ -206,8 +206,8 @@ export async function PUT(request: Request) {
     const { post, moderation, previous } = await updatePost(payload);
 
     revalidatePath("/");
-    revalidatePath(`/topics/${previous.topic.slug}`);
-    revalidatePath(`/topics/${post.topic.slug}`);
+    revalidatePath(`/r/${previous.topic.slug}`);
+    revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/posts/${previous.slug}`);
     revalidatePath(`/posts/${post.slug}`);
     revalidatePath("/sitemap.xml");
@@ -251,7 +251,7 @@ export async function DELETE(request: Request) {
     const post = await deletePost(payload);
 
     revalidatePath("/");
-    revalidatePath(`/topics/${post.topic.slug}`);
+    revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/posts/${post.slug}`);
     revalidatePath("/sitemap.xml");
 
@@ -323,7 +323,7 @@ function postResponseBody(
       id: post.topic.id,
       slug: post.topic.slug,
       name: post.topic.name,
-      url: absoluteUrl(`/topics/${post.topic.slug}`),
+      url: absoluteUrl(`/r/${post.topic.slug}`),
     },
     author: {
       id: post.author.id,

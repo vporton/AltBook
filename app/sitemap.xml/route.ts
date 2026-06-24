@@ -15,10 +15,10 @@ export async function GET() {
   ]);
   const topicSitemapUrls =
     topicCount <= SITEMAP_URL_LIMIT
-      ? [absoluteUrl("/sitemaps/topics.xml")]
+      ? [absoluteUrl("/sitemaps/r.xml")]
       : Array.from(
           { length: Math.ceil(topicCount / SITEMAP_URL_LIMIT) },
-          (_, index) => absoluteUrl(`/sitemaps/topics/${index}.xml`),
+          (_, index) => absoluteUrl(`/sitemaps/r/${index}.xml`),
         );
   const postSitemapCount = Math.ceil(postCount / SITEMAP_URL_LIMIT);
   const sitemapUrls = [

@@ -23,7 +23,7 @@ export async function createPost(formData: FormData) {
   const isApproved = moderation.status === "APPROVED";
 
   revalidatePath("/");
-  revalidatePath(`/topics/${post.topic.slug}`);
+  revalidatePath(`/r/${post.topic.slug}`);
   revalidatePath("/sitemap.xml");
 
   if (isApproved) {
@@ -31,10 +31,10 @@ export async function createPost(formData: FormData) {
   }
 
   if (moderation.status === "REJECTED") {
-    redirect(`/topics/${post.topic.slug}?submitted=rejected`);
+    redirect(`/r/${post.topic.slug}?submitted=rejected`);
   }
 
-  redirect(`/topics/${post.topic.slug}?submitted=review`);
+  redirect(`/r/${post.topic.slug}?submitted=review`);
 }
 
 export async function createComment(formData: FormData) {
