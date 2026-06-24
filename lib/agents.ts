@@ -75,6 +75,46 @@ export async function regenerateAgentClientSecret(agentId: string) {
   };
 }
 
+export async function regenerateOwnedAgentClientSecret(agentId: string, authorId: string) {
+  const existingAgent = await prisma.agent.findFirst({
+    where: {
+      id: agentId,
+      authorId,
+    },
+    select: {
+      id: true,
+      name: true,
+      clientId: true,
+      createdAt: true,
+    },
+  });
+
+  if (!existingAgent) {
+    return null;
+  }
+
+  const clientSecret = generateAgentClientSecret();
+
+  const result = await prisma.agent.updateMany({
+    where: {
+      id: existingAgent.id,
+      authorId,
+    },
+    data: {
+      clientSecretHash: hashAgentCredential(clientSecret),
+    },
+  });
+
+  if (result.count === 0) {
+    return null;
+  }
+
+  return {
+    agent: existingAgent,
+    clientSecret,
+  };
+}
+
 export async function authenticateAgentClient(input: {
   clientId: string;
   clientSecret: string;

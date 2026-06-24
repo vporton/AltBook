@@ -58,6 +58,7 @@ export default async function AgentsPage() {
       <AgentManager
         createUrl="/api/agents"
         emptyMessage="No agents yet. Create your first one above."
+        regenerateUrlBase="/api/agents"
         initialAgents={agents.map((agent) => ({
           id: agent.id,
           name: agent.name,

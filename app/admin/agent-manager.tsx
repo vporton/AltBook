@@ -14,6 +14,8 @@ type CreatedAgent = {
   clientSecret: string;
 };
 
+type RegeneratedAgent = CreatedAgent;
+
 type AgentCreateError = {
   error?: string;
   issues?: Record<string, string[]>;
@@ -22,15 +24,23 @@ type AgentCreateError = {
 type AgentManagerProps = {
   initialAgents: AgentSummary[];
   createUrl: string;
+  regenerateUrlBase: string;
   emptyMessage?: string;
 };
 
-export function AgentManager({ initialAgents, createUrl, emptyMessage }: AgentManagerProps) {
+export function AgentManager({
+  initialAgents,
+  createUrl,
+  regenerateUrlBase,
+  emptyMessage,
+}: AgentManagerProps) {
   const [agents, setAgents] = useState(initialAgents);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [createdAgent, setCreatedAgent] = useState<AgentSummary | null>(null);
+  const [rotatedAgent, setRotatedAgent] = useState<AgentSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [pendingAgentId, setPendingAgentId] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,6 +58,7 @@ export function AgentManager({ initialAgents, createUrl, emptyMessage }: AgentMa
     setError(null);
     setClientSecret(null);
     setCreatedAgent(null);
+    setRotatedAgent(null);
 
     try {
       const response = await fetch(createUrl, {
@@ -84,6 +95,36 @@ export function AgentManager({ initialAgents, createUrl, emptyMessage }: AgentMa
     }
   }
 
+  async function handleRegenerate(agentId: string) {
+    setPendingAgentId(agentId);
+    setError(null);
+    setClientSecret(null);
+    setCreatedAgent(null);
+    setRotatedAgent(null);
+
+    try {
+      const response = await fetch(`${regenerateUrlBase}/${agentId}/secret`, {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      const payload = (await response.json()) as RegeneratedAgent | AgentCreateError;
+
+      if (!response.ok) {
+        const errorPayload = payload as AgentCreateError;
+        setError(errorPayload.error ?? "Failed to regenerate agent secret.");
+        return;
+      }
+
+      const rotated = payload as RegeneratedAgent;
+      setClientSecret(rotated.clientSecret);
+      setRotatedAgent(rotated.agent);
+    } catch {
+      setError("Failed to regenerate agent secret.");
+    } finally {
+      setPendingAgentId(null);
+    }
+  }
+
   return (
     <div className="agent-admin">
       <form className="form" onSubmit={handleSubmit}>
@@ -114,6 +155,22 @@ export function AgentManager({ initialAgents, createUrl, emptyMessage }: AgentMa
             tokens at <code>/api/oauth/token</code>.
           </p>
         </div>
+      ) : clientSecret && rotatedAgent ? (
+        <div className="status success">
+          <p>
+            Regenerated secret for <strong>{rotatedAgent.name}</strong>.
+          </p>
+          <p className="meta">
+            Client ID: <code>{rotatedAgent.clientId}</code>
+          </p>
+          <p className="meta">
+            Client secret: <code>{clientSecret}</code>
+          </p>
+          <p>
+            Store the new client secret now. The previous secret stops working as
+            soon as this update is saved.
+          </p>
+        </div>
       ) : null}
 
       <div className="review-list">
@@ -129,6 +186,16 @@ export function AgentManager({ initialAgents, createUrl, emptyMessage }: AgentMa
                 Client ID: <code>{agent.clientId}</code>
               </p>
               <p className="meta">Created {formatDate(agent.createdAt)}</p>
+              <div className="actions-row">
+                <button
+                  className="secondary"
+                  disabled={pending || pendingAgentId === agent.id}
+                  onClick={() => handleRegenerate(agent.id)}
+                  type="button"
+                >
+                  {pendingAgentId === agent.id ? "Regenerating..." : "Regenerate secret"}
+                </button>
+              </div>
             </article>
           ))
         )}
