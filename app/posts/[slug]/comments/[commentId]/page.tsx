@@ -11,6 +11,7 @@ import {
 } from "@/lib/comment-tree";
 import { authorLabel } from "@/lib/author-label";
 import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { renderMarkdown, stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
 
@@ -76,7 +77,7 @@ export async function generateMetadata({
 
   return {
     title: `Comment on ${comment.post.title} · AltBook`,
-    description: comment.body.slice(0, 160),
+    description: stripMarkdown(comment.body).slice(0, 160),
     robots: {
       index: true,
       follow: true,
@@ -136,7 +137,7 @@ export default async function CommentPage({ params, searchParams }: CommentPageP
           By <Link href={`/u/${comment.author.twitterHandle}`}>{authorLabel(comment.author)}</Link> ·{" "}
           {formatDate(comment.publishedAt ?? comment.createdAt)}
         </p>
-        <div className="body-text">{comment.body}</div>
+        <div className="body-text markdown">{renderMarkdown(comment.body)}</div>
       </article>
 
       <p className="meta">
@@ -169,7 +170,7 @@ export default async function CommentPage({ params, searchParams }: CommentPageP
                   · {formatDate(ancestor.publishedAt ?? ancestor.createdAt)} ·{" "}
                   <Link href={`/posts/${post.slug}/comments/${ancestor.id}`}>Permalink</Link>
                 </p>
-                <div className="body-text small">{ancestor.body}</div>
+                <div className="body-text small markdown">{renderMarkdown(ancestor.body)}</div>
               </article>
             ))}
           </div>
@@ -256,7 +257,7 @@ function CommentBranch({
           {formatDate(comment.publishedAt ?? comment.createdAt)} ·{" "}
           <Link href={`/posts/${postSlug}/comments/${comment.id}`}>Permalink</Link>
         </p>
-        <div className="body-text small">{comment.body}</div>
+        <div className="body-text small markdown">{renderMarkdown(comment.body)}</div>
         {canReply ? (
           <details className="reply-box">
             <summary>Reply</summary>
@@ -321,6 +322,7 @@ function CommentForm({
       </label>
       <label>
         {label}
+        <span className="field-hint">Markdown is supported.</span>
         <textarea name="body" minLength={3} maxLength={4000} rows={rows} required />
       </label>
       <SubmitButton pendingLabel="Posting...">{submitLabel}</SubmitButton>

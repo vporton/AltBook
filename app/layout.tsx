@@ -51,6 +51,24 @@ export default async function RootLayout({
           </nav>
         </header>
         {children}
+        <footer className="site-footer">
+          <a
+            className="github-source-link"
+            href="https://github.com/vporton/AltBook"
+            rel="noreferrer"
+            target="_blank"
+            aria-label="Source on GitHub"
+            title="Source on GitHub"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              className="github-source-icon"
+              src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            />
+            <span className="sr-only">Source on GitHub</span>
+          </a>
+        </footer>
       </body>
     </html>
   );

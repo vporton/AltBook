@@ -51,6 +51,54 @@ a {
   padding: 18px clamp(16px, 4vw, 48px);
 }
 
+.site-footer {
+  display: flex;
+  justify-content: center;
+  padding: 0 clamp(16px, 4vw, 48px) 28px;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.github-source-link {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(26, 40, 27, 0.1);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(24, 35, 22, 0.06);
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  padding: 0;
+  width: 44px;
+  text-decoration: none;
+}
+
+.github-source-link:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.github-source-link:focus-visible {
+  outline: 3px solid rgba(33, 112, 67, 0.28);
+  outline-offset: 3px;
+}
+
+.github-source-icon {
+  display: block;
+  height: 24px;
+  object-fit: contain;
+  width: 24px;
+}
+
 .auth-banner {
   align-items: center;
   background: linear-gradient(90deg, #122017, #203527);
@@ -703,6 +751,71 @@ code {
   font-size: 0.98rem;
 }
 
+.markdown {
+  white-space: normal;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown pre {
+  margin: 0 0 1rem;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  margin: 1.25rem 0 0.6rem;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.3rem;
+}
+
+.markdown li + li {
+  margin-top: 0.35rem;
+}
+
+.markdown blockquote {
+  border-left: 4px solid rgba(26, 40, 27, 0.16);
+  color: #4a594d;
+  padding-left: 1rem;
+}
+
+.markdown pre {
+  background: #edf1e9;
+  border-radius: 14px;
+  overflow-x: auto;
+  padding: 14px 16px;
+}
+
+.markdown pre code {
+  background: transparent;
+  color: inherit;
+  display: block;
+  font-size: 0.92rem;
+  padding: 0;
+}
+
+.markdown a {
+  color: var(--accent-strong);
+  text-decoration-color: rgba(40, 109, 59, 0.35);
+  text-underline-offset: 3px;
+}
+
 .post-full {
   border-bottom: 1px solid var(--line);
   margin-bottom: 22px;
@@ -770,6 +883,13 @@ code {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 550;
+  line-height: 1.35;
 }
 
 @media (max-width: 840px) {

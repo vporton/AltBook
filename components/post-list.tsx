@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { authorLabel } from "@/lib/author-label";
 import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { stripMarkdown } from "@/lib/markdown";
 import type { PostBrowserItem } from "@/lib/topic-browser";
 
 type PostListProps = {
@@ -50,7 +51,7 @@ export function PostList({
               {post._count.comments} comments
             </p>
           </div>
-          <p className="preview">{post.body}</p>
+          <p className="preview">{stripMarkdown(post.body)}</p>
         </article>
       ))}
     </div>

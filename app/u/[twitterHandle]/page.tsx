@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PaginationControls } from "@/components/pagination-controls";
 import { authorLabel } from "@/lib/author-label";
 import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
 
@@ -124,7 +125,7 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
                     {post._count.comments} comments
                   </p>
                 </div>
-                <p className="preview">{post.body}</p>
+                <p className="preview">{stripMarkdown(post.body)}</p>
               </article>
             ))}
           </div>

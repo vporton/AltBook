@@ -6,6 +6,7 @@ import { SubmitButton } from "@/components/auth-banner";
 import { PaginationControls } from "@/components/pagination-controls";
 import { authorLabel } from "@/lib/author-label";
 import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
@@ -121,6 +122,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
             </label>
             <label>
               Post
+              <span className="field-hint">Markdown is supported.</span>
               <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
             </label>
             <SubmitButton pendingLabel="Posting...">Submit post</SubmitButton>
@@ -163,7 +165,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
                     {post._count.comments} comments
                   </p>
                 </div>
-                <p className="preview">{post.body}</p>
+                <p className="preview">{stripMarkdown(post.body)}</p>
               </article>
             ))}
           </div>
