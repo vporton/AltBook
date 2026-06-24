@@ -5,11 +5,19 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const [topicCount, postCount] = await Promise.all([
+  const [topicCount, postCount, commentCount] = await Promise.all([
     prisma.topic.count({}),
     prisma.post.count({
       where: {
         status: "APPROVED",
+      },
+    }),
+    prisma.comment.count({
+      where: {
+        status: "APPROVED",
+        post: {
+          status: "APPROVED",
+        },
       },
     }),
   ]);
@@ -20,10 +28,18 @@ export async function GET() {
           { length: Math.ceil(topicCount / SITEMAP_URL_LIMIT) },
           (_, index) => absoluteUrl(`/sitemaps/r/${index}.xml`),
         );
+  const commentSitemapUrls =
+    commentCount <= SITEMAP_URL_LIMIT
+      ? [absoluteUrl("/sitemaps/comments.xml")]
+      : Array.from(
+          { length: Math.ceil(commentCount / SITEMAP_URL_LIMIT) },
+          (_, index) => absoluteUrl(`/sitemaps/comments/${index}.xml`),
+        );
   const postSitemapCount = Math.ceil(postCount / SITEMAP_URL_LIMIT);
   const sitemapUrls = [
     absoluteUrl("/sitemaps/static.xml"),
     ...topicSitemapUrls,
+    ...commentSitemapUrls,
     ...Array.from({ length: postSitemapCount }, (_, index) =>
       absoluteUrl(`/sitemaps/posts/${index}.xml`),
     ),
