@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import { AuthBanner } from "@/components/auth-banner";
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
   },
 };
 
+const GA_ID = "G-RS5VS28VQ4";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -29,6 +32,18 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
         <AuthBanner author={currentAuthor} />
         <header className="site-header">
           <Link className="brand" href="/">
