@@ -4,9 +4,12 @@ import { moderateSubmission, type ModerationResult } from "@/lib/moderation";
 import { prisma } from "@/lib/prisma";
 import { createUniquePostSlug, createUniqueTopicSlug } from "@/lib/slug";
 
-const authorRefSchema = {
-  authorId: z.string().trim().min(1).optional(),
-  authorTwitterId: z.string().trim().min(1).max(80).optional(),
+const authorIdSchema = z.string().trim().min(1);
+const requiredAuthorRefSchema = {
+  authorId: authorIdSchema,
+};
+const optionalAuthorRefSchema = {
+  authorId: authorIdSchema.optional(),
 };
 
 const topicSlugPattern = /^[a-z]+(?:_[a-z]+)*$/;
@@ -40,15 +43,15 @@ export const postInputSchema = z
     title: z.string().trim().min(4).max(140),
     body: z.string().trim().min(20).max(12000),
     source: contentSourceSchema,
-    ...authorRefSchema,
+    ...requiredAuthorRefSchema,
     ...topicRefSchema,
   })
   .superRefine((payload, context) => {
-    if (!payload.authorId && !payload.authorTwitterId) {
+    if (!payload.authorId) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "A registered Twitter author is required.",
-        path: ["authorTwitterId"],
+        message: "An author id is required.",
+        path: ["authorId"],
       });
     }
 
@@ -66,7 +69,7 @@ export const postUpdateSchema = z
     ...postRefSchema,
     title: z.string().trim().min(4).max(140).optional(),
     body: z.string().trim().min(20).max(12000).optional(),
-    ...authorRefSchema,
+    ...optionalAuthorRefSchema,
     ...topicRefSchema,
   })
   .superRefine((payload, context) => {
@@ -76,7 +79,6 @@ export const postUpdateSchema = z
       !payload.title &&
       !payload.body &&
       !payload.authorId &&
-      !payload.authorTwitterId &&
       !payload.topicId &&
       !payload.topicSlug
     ) {
@@ -96,14 +98,14 @@ export const commentInputSchema = z
     parentCommentId: z.string().trim().min(1).optional(),
     body: z.string().trim().min(3).max(4000),
     source: contentSourceSchema,
-    ...authorRefSchema,
+    ...requiredAuthorRefSchema,
   })
   .superRefine((payload, context) => {
-    if (!payload.authorId && !payload.authorTwitterId) {
+    if (!payload.authorId) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "A registered Twitter author is required.",
-        path: ["authorTwitterId"],
+        message: "An author id is required.",
+        path: ["authorId"],
       });
     }
   });
@@ -112,7 +114,7 @@ export const topicInputSchema = z.object({
   name: z.string().trim().min(2).max(80),
   slug: topicSlugSchema.optional(),
   description: z.string().trim().max(300).optional().or(z.literal("")),
-  ...authorRefSchema,
+  ...optionalAuthorRefSchema,
 });
 
 export class PublishingInputError extends Error {
@@ -193,7 +195,7 @@ export async function updatePost(input: unknown) {
   }
 
   const [author, topic] = await Promise.all([
-    hasAuthorRef(payload) ? resolveAuthor(payload) : null,
+    payload.authorId ? resolveAuthor({ authorId: payload.authorId }) : null,
     hasTopicRef(payload) ? resolveTopic(payload) : null,
   ]);
   const shouldModerate = Boolean(payload.title || payload.body);
@@ -372,13 +374,12 @@ export async function createTopic(input: unknown) {
 }
 
 async function resolveAuthor(input: {
-  authorId?: string;
-  authorTwitterId?: string;
+  authorId: string;
 }) {
   const author = await resolveOptionalAuthor(input);
 
   if (!author) {
-    throw new PublishingInputError("Registered Twitter author not found.", 404);
+    throw new PublishingInputError("Author not found.", 404);
   }
 
   return author;
@@ -386,20 +387,11 @@ async function resolveAuthor(input: {
 
 async function resolveOptionalAuthor(input: {
   authorId?: string;
-  authorTwitterId?: string;
 }) {
   if (input.authorId) {
     return prisma.author.findUnique({
       where: {
         id: input.authorId,
-      },
-    });
-  }
-
-  if (input.authorTwitterId) {
-    return prisma.author.findUnique({
-      where: {
-        twitterId: input.authorTwitterId,
       },
     });
   }
@@ -440,13 +432,6 @@ function postWhereUnique(input: {
   }
 
   throw new PublishingInputError("A post id or slug is required.");
-}
-
-function hasAuthorRef(input: {
-  authorId?: string;
-  authorTwitterId?: string;
-}) {
-  return Boolean(input.authorId || input.authorTwitterId);
 }
 
 function hasTopicRef(input: { topicId?: string; topicSlug?: string }) {
