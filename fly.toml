@@ -7,7 +7,7 @@ primary_region = "iad"
 [env]
   PORT = "3000"
   NODE_ENV = "production"
-  SITE_URL = "https://altbook.fly.dev"
+  SITE_URL = "https://altbook.xyz"
 
 [http_service]
   internal_port = 3000
