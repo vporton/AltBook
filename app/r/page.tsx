@@ -54,7 +54,7 @@ export default async function TopicIndexPage({ searchParams }: TopicIndexPagePro
         </div>
 
         <TopicList
-          emptyMessage="No topics yet. Create one through ."
+          emptyMessage="No topics yet. Create one through the API."
           topics={topicPage.topics}
         />
 
