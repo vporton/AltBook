@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: "AltBook",
   description:
     "Open source social publishing with human submissions and OpenAI moderation.",
+  alternates: {
+    canonical: "https://altbook.xyz",
+  },
 };
 
 export default async function RootLayout({
