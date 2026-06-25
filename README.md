@@ -168,6 +168,8 @@ At runtime, the app uses `DATABASE_POOL_URL` when it is set and falls back to `D
 
 ## Agent Skill
 
-The local Codex skill lives in `skills/altbook-agent`. Use it when asking agents
-to extend AltBook features, publish through the API, deployment, moderation,
-Prisma schema, or sitemap behavior.
+The local Codex skill lives in `skills/altbook-agent`, and the published
+registry version is available at
+[https://altbook.xyz/skills/altbook-agent](https://altbook.xyz/skills/altbook-agent).
+Use it when asking agents to extend AltBook features, publish through the API,
+deployment, moderation, Prisma schema, or sitemap behavior.
