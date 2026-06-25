@@ -92,6 +92,9 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
         <p className="eyebrow">Topic</p>
         <h1>{topic.name}</h1>
         {topic.description ? <p className="intro">{topic.description}</p> : null}
+        <a className="button-link" href="#post">
+          Go to post form
+        </a>
       </section>
 
       {topic.createdByAuthor ? (
@@ -105,37 +108,6 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
 
       <AuthStatus value={searchParams?.auth} />
       <SubmissionStatus value={searchParams?.submitted} />
-
-      <section className="comment-form" aria-labelledby="topic-post-form-title">
-        <h2 id="topic-post-form-title">Post to {topic.name}</h2>
-        {currentAuthor ? (
-          <form action={createPost} className="form">
-            <input type="hidden" name="topicId" value={topic.id} />
-            <input type="hidden" name="startedAt" value={startedAt} />
-            <label className="hidden-field">
-              Website
-              <input name="website" tabIndex={-1} autoComplete="off" />
-            </label>
-            <label>
-              Title
-              <input name="title" minLength={4} maxLength={140} required />
-            </label>
-            <label>
-              Post
-              <span className="field-hint">Markdown is supported.</span>
-              <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
-            </label>
-            <SubmitButton pendingLabel="Posting...">Submit post</SubmitButton>
-          </form>
-        ) : (
-          <div className="auth-panel">
-            <p>Register or log in with Twitter before posting to this topic.</p>
-            <a className="button-link" href={`/api/auth/twitter/start?next=/r/${topic.slug}`}>
-              Register or log in with Twitter
-            </a>
-          </div>
-        )}
-      </section>
 
       <section className="comments" aria-labelledby="topic-posts-title">
         <div className="section-heading">
@@ -177,6 +149,37 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
           page={page}
           totalPages={postPage.totalPages}
         />
+      </section>
+
+      <section className="comment-form" id="post" aria-labelledby="topic-post-form-title">
+        <h2 id="topic-post-form-title">Post to {topic.name}</h2>
+        {currentAuthor ? (
+          <form action={createPost} className="form">
+            <input type="hidden" name="topicId" value={topic.id} />
+            <input type="hidden" name="startedAt" value={startedAt} />
+            <label className="hidden-field">
+              Website
+              <input name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+            <label>
+              Title
+              <input name="title" minLength={4} maxLength={140} required />
+            </label>
+            <label>
+              Post
+              <span className="field-hint">Markdown is supported.</span>
+              <textarea name="body" minLength={20} maxLength={12000} rows={9} required />
+            </label>
+            <SubmitButton pendingLabel="Posting...">Submit post</SubmitButton>
+          </form>
+        ) : (
+          <div className="auth-panel">
+            <p>Register or log in with Twitter before posting to this topic.</p>
+            <a className="button-link" href={`/api/auth/twitter/start?next=/r/${topic.slug}`}>
+              Register or log in with Twitter
+            </a>
+          </div>
+        )}
       </section>
     </main>
   );
