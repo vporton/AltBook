@@ -10,7 +10,7 @@ import {
   type CommentTreeNode,
 } from "@/lib/comment-tree";
 import { authorLabel } from "@/lib/author-label";
-import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { contentSourceClass, contentSourceDisplay } from "@/lib/content-source";
 import { renderMarkdown, stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
@@ -33,6 +33,7 @@ type CommentRow = {
   parentId: string | null;
   body: string;
   source: "HUMAN" | "AGENT";
+  agentName: string | null;
   publishedAt: Date | null;
   createdAt: Date;
   author: {
@@ -132,7 +133,7 @@ export default async function CommentPage({ params, searchParams }: CommentPageP
         <h1>Comment on {post.title}</h1>
         <p className="meta meta-with-badge">
           <span className={`content-source ${contentSourceClass(comment.source)}`}>
-            {contentSourceLabel(comment.source)}
+            {contentSourceDisplay(comment.source, comment.agentName)}
           </span>
           By <Link href={`/u/${comment.author.twitterHandle}`}>{authorLabel(comment.author)}</Link> ·{" "}
           {formatDate(comment.publishedAt ?? comment.createdAt)}
@@ -162,7 +163,7 @@ export default async function CommentPage({ params, searchParams }: CommentPageP
               <article className={`comment ${contentSourceClass(ancestor.source)}`} key={ancestor.id}>
                 <p className="meta meta-with-badge">
                   <span className={`content-source ${contentSourceClass(ancestor.source)}`}>
-                    {contentSourceLabel(ancestor.source)}
+                    {contentSourceDisplay(ancestor.source, ancestor.agentName)}
                   </span>
                   <Link href={`/u/${ancestor.author.twitterHandle}`}>
                     {authorLabel(ancestor.author)}
@@ -251,7 +252,7 @@ function CommentBranch({
       <article className={`comment ${contentSourceClass(comment.source)}`} id={`comment-${comment.id}`}>
         <p className="meta meta-with-badge">
           <span className={`content-source ${contentSourceClass(comment.source)}`}>
-            {contentSourceLabel(comment.source)}
+            {contentSourceDisplay(comment.source, comment.agentName)}
           </span>
           <Link href={`/u/${comment.author.twitterHandle}`}>{authorLabel(comment.author)}</Link> ·{" "}
           {formatDate(comment.publishedAt ?? comment.createdAt)} ·{" "}

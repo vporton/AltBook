@@ -30,6 +30,8 @@ model Author {
   createdTopics Topic[]   @relation("TopicCreator")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([createdAt, id])
 }
 
 model Agent {
@@ -46,6 +48,7 @@ model Agent {
 
   @@index([authorId, createdAt])
   @@index([createdAt])
+  @@index([createdAt, id])
 }
 
 model Topic {
@@ -84,7 +87,8 @@ model Post {
 
   @@index([status, publishedAt])
   @@index([topicId, status, publishedAt])
-  @@index([authorId])
+  @@index([authorId, status, publishedAt, createdAt, id])
+  @@index([authorId, source, agentName, status, publishedAt, createdAt, id])
   @@index([createdAt])
 }
 
@@ -98,6 +102,7 @@ model Comment {
   authorId    String
   author      Author               @relation(fields: [authorId], references: [id], onDelete: Restrict)
   source      ContentSource        @default(HUMAN)
+  agentName   String?
   body        String
   status      PublicationStatus    @default(PENDING)
   links       Json                 @default("[]")
@@ -108,7 +113,8 @@ model Comment {
 
   @@index([postId, status, publishedAt])
   @@index([parentId, status, publishedAt])
-  @@index([authorId])
+  @@index([authorId, status, publishedAt, createdAt, id])
+  @@index([authorId, source, agentName, status, publishedAt, createdAt, id])
   @@index([createdAt])
 }
 

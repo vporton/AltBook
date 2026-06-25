@@ -10,9 +10,9 @@ import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
 
 export const dynamic = "force-dynamic";
 
-type UserPageProps = {
+type AgentPostsPageProps = {
   params: {
-    twitterHandle: string;
+    id: string;
   };
   searchParams?: {
     page?: string;
@@ -22,20 +22,25 @@ type UserPageProps = {
 export async function generateMetadata({
   params,
   searchParams,
-}: UserPageProps): Promise<Metadata> {
-  const author = await prisma.author.findUnique({
+}: AgentPostsPageProps): Promise<Metadata> {
+  const agent = await prisma.agent.findUnique({
     where: {
-      twitterHandle: params.twitterHandle.toLowerCase(),
+      id: params.id,
     },
     select: {
-      displayName: true,
-      twitterHandle: true,
+      name: true,
+      author: {
+        select: {
+          displayName: true,
+          twitterHandle: true,
+        },
+      },
     },
   });
 
-  if (!author) {
+  if (!agent) {
     return {
-      title: "Author not found · AltBook",
+      title: "Agent not found · AltBook",
       robots: {
         index: false,
         follow: true,
@@ -48,9 +53,9 @@ export async function generateMetadata({
   return {
     title:
       page > 1
-        ? `${author.displayName} · Posts · Page ${page} · AltBook`
-        : `${author.displayName} · Posts · AltBook`,
-    description: `Posts by ${authorLabel(author)}.`,
+        ? `${agent.name} · Posts · Page ${page} · AltBook`
+        : `${agent.name} · Posts · AltBook`,
+    description: `Posts published by ${agent.name}.`,
     robots: {
       index: false,
       follow: true,
@@ -58,19 +63,28 @@ export async function generateMetadata({
   };
 }
 
-export default async function UserPage({ params, searchParams }: UserPageProps) {
-  const author = await prisma.author.findUnique({
+export default async function AgentPostsPage({
+  params,
+  searchParams,
+}: AgentPostsPageProps) {
+  const agent = await prisma.agent.findUnique({
     where: {
-      twitterHandle: params.twitterHandle.toLowerCase(),
+      id: params.id,
     },
     select: {
       id: true,
-      displayName: true,
-      twitterHandle: true,
+      name: true,
+      authorId: true,
+      author: {
+        select: {
+          displayName: true,
+          twitterHandle: true,
+        },
+      },
     },
   });
 
-  if (!author) {
+  if (!agent) {
     notFound();
   }
 
@@ -78,7 +92,9 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
   const postPage = await getPostBrowserPage({
     page,
     where: {
-      authorId: author.id,
+      authorId: agent.authorId,
+      source: "AGENT",
+      agentName: agent.name,
       status: "APPROVED",
     },
   });
@@ -90,25 +106,22 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
   return (
     <main className="content-page">
       <section className="post-full">
-        <p className="eyebrow">Author</p>
-        <h1>{authorLabel(author)}</h1>
+        <p className="eyebrow">Agent posts</p>
+        <h1>{agent.name}</h1>
         <p className="intro">
-          Public posts by this author.{" "}
-          <Link href={`/u/${author.twitterHandle}/comments`}>View their comments</Link> ·{" "}
-          <Link href={`/authors/${author.twitterHandle}/topics`}>View their topics</Link>
+          Posts published by this agent. Owned by{" "}
+          <Link href={`/u/${agent.author.twitterHandle}`}>{authorLabel(agent.author)}</Link>.
         </p>
       </section>
 
-      <section className="comments" aria-labelledby="author-posts-title">
+      <section className="comments" aria-labelledby="agent-posts-title">
         <div className="section-heading">
-          <h2 id="author-posts-title">Posts</h2>
+          <h2 id="agent-posts-title">Posts</h2>
           <p>{postPage.totalCount} approved</p>
         </div>
 
         {postPage.posts.length === 0 ? (
-          <div className="empty">
-            {author.displayName} has not published any approved posts yet.
-          </div>
+          <div className="empty">No approved posts yet.</div>
         ) : (
           <div className="post-list">
             {postPage.posts.map((post) => (
@@ -133,8 +146,8 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
         )}
 
         <PaginationControls
-          ariaLabel="User post pagination"
-          basePath={`/u/${author.twitterHandle}`}
+          ariaLabel="Agent post pagination"
+          basePath={`/agents/${agent.id}/posts`}
           page={page}
           totalPages={postPage.totalPages}
         />

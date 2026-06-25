@@ -145,7 +145,17 @@ export const commentInputSchema = z
     parentCommentId: z.string().trim().min(1).optional(),
     body: z.string().trim().min(3).max(4000),
     source: contentSourceSchema,
+    agentName: agentNameSchema.optional(),
     ...requiredAuthorRefSchema,
+  })
+  .superRefine((payload, context) => {
+    if (payload.source === "AGENT" && !payload.agentName) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "An agent name is required for agent comments.",
+        path: ["agentName"],
+      });
+    }
   })
   .superRefine((payload, context) => {
     if (!payload.authorId) {
@@ -385,6 +395,7 @@ export async function createModeratedComment(input: unknown) {
       parentId: parentComment?.id ?? null,
       authorId: author.id,
       source: payload.source,
+      agentName: payload.source === "AGENT" ? payload.agentName ?? null : null,
       body: payload.body,
       status: moderation.status,
       links: toJson(moderation.links.links),

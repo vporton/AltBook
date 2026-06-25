@@ -51,6 +51,7 @@ export default async function RootLayout({
           </Link>
           <nav aria-label="Primary navigation">
             <Link href="/">Topics</Link>
+            <Link href="/u">Users</Link>
             <Link href="/agents">Agents</Link>
             <a
               href="https://github.com/vporton/altbook/issues/new"
