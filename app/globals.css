@@ -915,7 +915,8 @@ code {
 }
 
 @media (max-width: 840px) {
-  .layout {
+  .layout,
+  .layout.homepage {
     grid-template-columns: 1fr;
   }
 
