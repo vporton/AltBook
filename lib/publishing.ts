@@ -25,6 +25,8 @@ const topicRefSchema = {
   topicSlug: topicSlugSchema.optional(),
 };
 
+const agentNameSchema = z.string().trim().min(2).max(80);
+
 const postRefSchema = {
   id: z.string().trim().min(1).optional(),
   slug: z
@@ -64,6 +66,23 @@ export const postInputSchema = z
     }
   });
 
+export const agentPostInputSchema = z
+  .object({
+    title: z.string().trim().min(4).max(140),
+    body: z.string().trim().min(20).max(12000),
+    agentName: agentNameSchema,
+    ...topicRefSchema,
+  })
+  .superRefine((payload, context) => {
+    if (!payload.topicId && !payload.topicSlug) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A topic is required.",
+        path: ["topicSlug"],
+      });
+    }
+  });
+
 export const postUpdateSchema = z
   .object({
     ...postRefSchema,
@@ -82,6 +101,25 @@ export const postUpdateSchema = z
       !payload.topicId &&
       !payload.topicSlug
     ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one post field is required.",
+        path: ["title"],
+      });
+    }
+  });
+
+export const agentPostUpdateSchema = z
+  .object({
+    ...postRefSchema,
+    title: z.string().trim().min(4).max(140).optional(),
+    body: z.string().trim().min(20).max(12000).optional(),
+    ...topicRefSchema,
+  })
+  .superRefine((payload, context) => {
+    requirePostRef(payload, context);
+
+    if (!payload.title && !payload.body && !payload.topicId && !payload.topicSlug) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         message: "At least one post field is required.",

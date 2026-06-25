@@ -8,10 +8,10 @@ import { absoluteUrl } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const authError = await authorizeAgentRequest(request);
+  const auth = await authorizeAgentRequest(request);
 
-  if (authError) {
-    return authError;
+  if ("response" in auth) {
+    return auth.response;
   }
 
   const searchParams = new URL(request.url).searchParams;

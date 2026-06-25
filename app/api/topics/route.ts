@@ -9,10 +9,10 @@ import { absoluteUrl } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const authError = await authorizeAgentRequest(request);
+  const auth = await authorizeAgentRequest(request);
 
-  if (authError) {
-    return authError;
+  if ("response" in auth) {
+    return auth.response;
   }
 
   let body: unknown;

@@ -176,6 +176,7 @@ export async function authenticateAgentAccessToken(accessToken: string) {
       id: true,
       name: true,
       clientId: true,
+      authorId: true,
     },
   });
 

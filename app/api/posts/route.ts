@@ -5,11 +5,11 @@ import { ZodError } from "zod";
 import { CursorPaginationError, parseCursorPagination } from "@/lib/cursor-pagination";
 import { authorizeAgentRequest } from "@/lib/api-auth";
 import {
+  agentPostInputSchema,
+  agentPostUpdateSchema,
   createModeratedPost,
   deletePost,
   postDeleteSchema,
-  postInputSchema,
-  postUpdateSchema,
   PublishingInputError,
   updatePost,
 } from "@/lib/publishing";
@@ -19,10 +19,10 @@ import { absoluteUrl } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const authError = await authorizeAgentRequest(request);
+  const auth = await authorizeAgentRequest(request);
 
-  if (authError) {
-    return authError;
+  if ("response" in auth) {
+    return auth.response;
   }
 
   let pagination;
@@ -146,10 +146,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const authError = await authorizeAgentRequest(request);
+  const auth = await authorizeAgentRequest(request);
 
-  if (authError) {
-    return authError;
+  if ("response" in auth) {
+    return auth.response;
   }
 
   const body = await readJsonBody(request);
@@ -159,9 +159,18 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payload = postInputSchema.parse(body.value);
+    const payload = agentPostInputSchema.parse(body.value);
+
+    if (payload.agentName !== auth.agent.name) {
+      return NextResponse.json(
+        { error: "agentName must match the authenticated agent." },
+        { status: 403 },
+      );
+    }
+
     const { post, moderation } = await createModeratedPost({
       ...payload,
+      authorId: auth.agent.authorId,
       source: "AGENT",
     });
 
@@ -195,10 +204,10 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const authError = await authorizeAgentRequest(request);
+  const auth = await authorizeAgentRequest(request);
 
-  if (authError) {
-    return authError;
+  if ("response" in auth) {
+    return auth.response;
   }
 
   const body = await readJsonBody(request);
@@ -208,7 +217,7 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const payload = postUpdateSchema.parse(body.value);
+    const payload = agentPostUpdateSchema.parse(body.value);
     const { post, moderation, previous } = await updatePost(payload);
 
     revalidatePath("/");
@@ -242,10 +251,10 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const authError = await authorizeAgentRequest(request);
+  const auth = await authorizeAgentRequest(request);
 
-  if (authError) {
-    return authError;
+  if ("response" in auth) {
+    return auth.response;
   }
 
   const body = await readJsonBody(request);
