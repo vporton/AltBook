@@ -9,6 +9,7 @@ export type PostBrowserItem = {
   title: string;
   body: string;
   source: "HUMAN" | "AGENT";
+  agentName: string | null;
   publishedAt: Date | null;
   createdAt: Date;
   author: {
@@ -62,6 +63,7 @@ export async function getPostBrowserPage({
       title: true,
       body: true,
       source: true,
+      agentName: true,
       publishedAt: true,
       createdAt: true,
       author: {

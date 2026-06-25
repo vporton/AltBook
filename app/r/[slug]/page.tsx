@@ -5,7 +5,7 @@ import { createPost } from "@/app/actions";
 import { SubmitButton } from "@/components/auth-banner";
 import { PaginationControls } from "@/components/pagination-controls";
 import { authorLabel } from "@/lib/author-label";
-import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { contentSourceClass, contentSourceDisplay } from "@/lib/content-source";
 import { stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
@@ -127,7 +127,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
                   </h3>
                   <p className="meta meta-with-badge">
                     <span className={`content-source ${contentSourceClass(post.source)}`}>
-                      {contentSourceLabel(post.source)}
+                      {contentSourceDisplay(post.source, post.agentName)}
                     </span>
                     By{" "}
                     <Link href={`/u/${post.author.twitterHandle}`}>

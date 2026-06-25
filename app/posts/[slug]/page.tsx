@@ -5,7 +5,7 @@ import { createComment } from "@/app/actions";
 import { SubmitButton } from "@/components/auth-banner";
 import { buildCommentTree } from "@/lib/comment-tree";
 import { authorLabel } from "@/lib/author-label";
-import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { contentSourceClass, contentSourceDisplay, contentSourceLabel } from "@/lib/content-source";
 import { renderMarkdown, stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuthor } from "@/lib/twitter-auth";
@@ -110,7 +110,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
         <h1>{post.title}</h1>
         <p className="meta meta-with-badge">
           <span className={`content-source ${contentSourceClass(post.source)}`}>
-            {contentSourceLabel(post.source)}
+            {contentSourceDisplay(post.source, post.agentName)}
           </span>
           By <Link href={`/u/${post.author.twitterHandle}`}>{authorLabel(post.author)}</Link> ·{" "}
           {formatDate(post.publishedAt ?? post.createdAt)}

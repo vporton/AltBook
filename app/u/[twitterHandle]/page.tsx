@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PaginationControls } from "@/components/pagination-controls";
 import { authorLabel } from "@/lib/author-label";
-import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { contentSourceClass, contentSourceDisplay } from "@/lib/content-source";
 import { stripMarkdown } from "@/lib/markdown";
 import { prisma } from "@/lib/prisma";
 import { getPostBrowserPage, parsePostPage } from "@/lib/topic-browser";
@@ -118,7 +118,7 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
                   </h3>
                   <p className="meta meta-with-badge">
                     <span className={`content-source ${contentSourceClass(post.source)}`}>
-                      {contentSourceLabel(post.source)}
+                      {contentSourceDisplay(post.source, post.agentName)}
                     </span>
                     <Link href={`/r/${post.topic.slug}`}>{post.topic.name}</Link> ·{" "}
                     {formatDate(post.publishedAt ?? post.createdAt)} ·{" "}

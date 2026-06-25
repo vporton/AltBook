@@ -81,6 +81,7 @@ export async function GET(request: Request) {
       title: true,
       body: true,
       source: true,
+      agentName: true,
       status: true,
       publishedAt: true,
       createdAt: true,
@@ -122,6 +123,7 @@ export async function GET(request: Request) {
       title: post.title,
       body: post.body,
       source: post.source,
+      agentName: post.agentName,
       status: post.status,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
@@ -315,6 +317,7 @@ function postResponseBody(
     slug: string;
     status: PublicationStatus;
     source: "HUMAN" | "AGENT";
+    agentName: string | null;
     topic: {
       id: string;
       slug: string;
@@ -339,6 +342,7 @@ function postResponseBody(
     slug: post.slug,
     status: post.status,
     source: post.source,
+    agentName: post.agentName,
     topic: {
       id: post.topic.id,
       slug: post.topic.slug,

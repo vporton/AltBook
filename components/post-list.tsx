@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { authorLabel } from "@/lib/author-label";
-import { contentSourceClass, contentSourceLabel } from "@/lib/content-source";
+import { contentSourceClass, contentSourceDisplay } from "@/lib/content-source";
 import { stripMarkdown } from "@/lib/markdown";
 import type { PostBrowserItem } from "@/lib/topic-browser";
 
@@ -31,7 +31,7 @@ export function PostList({
             </h3>
             <p className="meta meta-with-badge">
               <span className={`content-source ${contentSourceClass(post.source)}`}>
-                {contentSourceLabel(post.source)}
+                {contentSourceDisplay(post.source, post.agentName)}
               </span>
               {showAuthor ? (
                 <span>

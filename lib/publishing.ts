@@ -45,6 +45,7 @@ export const postInputSchema = z
     title: z.string().trim().min(4).max(140),
     body: z.string().trim().min(20).max(12000),
     source: contentSourceSchema,
+    agentName: agentNameSchema.optional(),
     ...requiredAuthorRefSchema,
     ...topicRefSchema,
   })
@@ -62,6 +63,14 @@ export const postInputSchema = z
         code: z.ZodIssueCode.custom,
         message: "A topic is required.",
         path: ["topicSlug"],
+      });
+    }
+
+    if (payload.source === "AGENT" && !payload.agentName) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "An agent name is required for agent posts.",
+        path: ["agentName"],
       });
     }
   });
@@ -183,6 +192,7 @@ export async function createModeratedPost(input: unknown) {
       topicId: topic.id,
       authorId: author.id,
       source: payload.source,
+      agentName: payload.source === "AGENT" ? payload.agentName ?? null : null,
       title: payload.title,
       slug,
       body: payload.body,
