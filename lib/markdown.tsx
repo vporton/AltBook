@@ -90,7 +90,7 @@ function renderLines(lines: string[], keyPrefix: string): ReactNode {
   });
 }
 
-function renderInline(text: string, keyPrefix: string): ReactNode[] {
+function renderInline(text: string, keyPrefix: string, inLink = false): ReactNode[] {
   const nodes: ReactNode[] = [];
   let bufferStart = 0;
   let index = 0;
@@ -111,7 +111,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
         flushBuffer(index);
         nodes.push(
           <strong key={`${keyPrefix}-${nodeIndex++}`}>
-            {renderInline(text.slice(index + 2, close), `${keyPrefix}-${nodeIndex}`)}
+            {renderInline(text.slice(index + 2, close), `${keyPrefix}-${nodeIndex}`, inLink)}
           </strong>,
         );
         index = close + 2;
@@ -127,7 +127,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
         flushBuffer(index);
         nodes.push(
           <em key={`${keyPrefix}-${nodeIndex++}`}>
-            {renderInline(text.slice(index + 1, close), `${keyPrefix}-${nodeIndex}`)}
+            {renderInline(text.slice(index + 1, close), `${keyPrefix}-${nodeIndex}`, inLink)}
           </em>,
         );
         index = close + 1;
@@ -159,12 +159,12 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
         if (isSafeHref(href)) {
           flushBuffer(index);
           nodes.push(
-            <a
+          <a
               key={`${keyPrefix}-${nodeIndex++}`}
               href={href}
               rel="noreferrer noopener"
             >
-              {renderInline(text.slice(index + 1, closeBracket), `${keyPrefix}-${nodeIndex}`)}
+              {renderInline(text.slice(index + 1, closeBracket), `${keyPrefix}-${nodeIndex}`, true)}
             </a>,
           );
           index = closeParen + 1;
@@ -172,6 +172,24 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
           continue;
         }
       }
+    }
+
+    const plainLink = inLink ? null : matchPlainLink(text, index);
+
+    if (plainLink) {
+      flushBuffer(index);
+      nodes.push(
+        <a
+          key={`${keyPrefix}-${nodeIndex++}`}
+          href={plainLink.href}
+          rel="noreferrer noopener"
+        >
+          {plainLink.text}
+        </a>,
+      );
+      index += plainLink.text.length;
+      bufferStart = index;
+      continue;
     }
 
     index += 1;
@@ -307,6 +325,78 @@ function isSafeHref(href: string) {
   } catch {
     return false;
   }
+}
+
+function matchPlainLink(text: string, index: number): { href: string; text: string } | null {
+  const candidate =
+    matchUrlPrefix(text, index, "https://") ||
+    matchUrlPrefix(text, index, "http://") ||
+    matchUrlPrefix(text, index, "mailto:") ||
+    matchUrlPrefix(text, index, "www.");
+
+  if (!candidate) {
+    return null;
+  }
+
+  const previousChar = index > 0 ? text[index - 1] : "";
+
+  if (previousChar && /[A-Za-z0-9_]/.test(previousChar)) {
+    return null;
+  }
+
+  const trimmed = trimTrailingUrlPunctuation(candidate);
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const href = trimmed.startsWith("www.") ? `https://${trimmed}` : trimmed;
+
+  if (!isSafeHref(href)) {
+    return null;
+  }
+
+  return { href, text: trimmed };
+}
+
+function matchUrlPrefix(text: string, index: number, prefix: string) {
+  return text.startsWith(prefix, index) ? readUrlCandidate(text, index) : null;
+}
+
+function readUrlCandidate(text: string, index: number) {
+  let end = index;
+
+  while (end < text.length && !/\s/.test(text[end])) {
+    end += 1;
+  }
+
+  return text.slice(index, end);
+}
+
+function trimTrailingUrlPunctuation(value: string) {
+  let end = value.length;
+
+  while (end > 0) {
+    const char = value[end - 1];
+
+    if (!")]}.,!?:;'\"".includes(char)) {
+      break;
+    }
+
+    if (char === ")" || char === "]" || char === "}") {
+      const openChar = char === ")" ? "(" : char === "]" ? "[" : "{";
+      const opens = (value.slice(0, end - 1).match(new RegExp(`\\${openChar}`, "g")) ?? []).length;
+      const closes = (value.slice(0, end - 1).match(new RegExp(`\\${char}`, "g")) ?? []).length;
+
+      if (opens > closes) {
+        break;
+      }
+    }
+
+    end -= 1;
+  }
+
+  return value.slice(0, end);
 }
 
 function normalizeWhitespace(value: string) {
