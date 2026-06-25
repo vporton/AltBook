@@ -11,7 +11,7 @@ type RouteContext = {
   };
 };
 
-export async function GET(_request: Request, { params }: RouteContext) {
+export async function GET(request: Request, { params }: RouteContext) {
   const match = params.page.match(/^(\d+)\.xml$/);
 
   if (!match) {
@@ -40,7 +40,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
   const body = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${posts
     .map(
       (post) =>
-        `<url><loc>${escapeXml(absoluteUrl(`/posts/${post.slug}`))}</loc><lastmod>${(
+        `<url><loc>${escapeXml(absoluteUrl(`/posts/${post.slug}`, request))}</loc><lastmod>${(
           post.publishedAt ?? post.updatedAt
         ).toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`,
     )

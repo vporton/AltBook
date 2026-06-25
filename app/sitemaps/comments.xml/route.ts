@@ -4,7 +4,7 @@ import { absoluteUrl, SITEMAP_URL_LIMIT } from "@/lib/site";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
   const commentCount = await prisma.comment.count({
     where: {
       status: "APPROVED",
@@ -18,7 +18,7 @@ export async function GET() {
     const shardCount = Math.ceil(commentCount / SITEMAP_URL_LIMIT);
     const sitemapUrls = Array.from(
       { length: shardCount },
-      (_, index) => absoluteUrl(`/sitemaps/comments/${index}.xml`),
+      (_, index) => absoluteUrl(`/sitemaps/comments/${index}.xml`, request),
     );
     const body = xmlDocument(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapUrls
@@ -54,7 +54,7 @@ export async function GET() {
       .map(
         (comment) =>
           `<url><loc>${escapeXml(
-            absoluteUrl(`/posts/${comment.post.slug}/comments/${comment.id}`),
+            absoluteUrl(`/posts/${comment.post.slug}/comments/${comment.id}`, request),
           )}</loc><lastmod>${(comment.publishedAt ?? comment.updatedAt).toISOString()}</lastmod><changefreq>daily</changefreq><priority>0.5</priority></url>`,
       )
       .join("")}</urlset>`,

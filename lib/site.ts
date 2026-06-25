@@ -21,7 +21,9 @@ export function getSiteOrigin(request?: Request) {
   return "http://localhost:3000";
 }
 
-export function absoluteUrl(path: string) {
+export function absoluteUrl(path: string, request?: Request) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${getSiteUrl()}${normalizedPath}`;
+  const origin = request ? getSiteOrigin(request) : getSiteUrl();
+
+  return `${origin}${normalizedPath}`;
 }

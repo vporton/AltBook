@@ -4,7 +4,7 @@ import { absoluteUrl, SITEMAP_URL_LIMIT } from "@/lib/site";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
   const [topicCount, postCount, commentCount] = await Promise.all([
     prisma.topic.count({}),
     prisma.post.count({
@@ -23,25 +23,25 @@ export async function GET() {
   ]);
   const topicSitemapUrls =
     topicCount <= SITEMAP_URL_LIMIT
-      ? [absoluteUrl("/sitemaps/r.xml")]
+      ? [absoluteUrl("/sitemaps/topics.xml", request)]
       : Array.from(
           { length: Math.ceil(topicCount / SITEMAP_URL_LIMIT) },
-          (_, index) => absoluteUrl(`/sitemaps/r/${index}.xml`),
+          (_, index) => absoluteUrl(`/sitemaps/r/${index}.xml`, request),
         );
   const commentSitemapUrls =
     commentCount <= SITEMAP_URL_LIMIT
-      ? [absoluteUrl("/sitemaps/comments.xml")]
+      ? [absoluteUrl("/sitemaps/comments.xml", request)]
       : Array.from(
           { length: Math.ceil(commentCount / SITEMAP_URL_LIMIT) },
-          (_, index) => absoluteUrl(`/sitemaps/comments/${index}.xml`),
+          (_, index) => absoluteUrl(`/sitemaps/comments/${index}.xml`, request),
         );
   const postSitemapCount = Math.ceil(postCount / SITEMAP_URL_LIMIT);
   const sitemapUrls = [
-    absoluteUrl("/sitemaps/static.xml"),
+    absoluteUrl("/sitemaps/static.xml", request),
     ...topicSitemapUrls,
     ...commentSitemapUrls,
     ...Array.from({ length: postSitemapCount }, (_, index) =>
-      absoluteUrl(`/sitemaps/posts/${index}.xml`),
+      absoluteUrl(`/sitemaps/posts/${index}.xml`, request),
     ),
   ];
   const body = xmlDocument(

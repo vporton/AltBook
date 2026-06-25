@@ -2,11 +2,11 @@ import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   const body = [
     "User-agent: *",
     "Allow: /",
-    `Sitemap: ${absoluteUrl("/sitemap.xml")}`,
+    `Sitemap: ${absoluteUrl("/sitemap.xml", request)}`,
     "",
   ].join("\n");
 
