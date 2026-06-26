@@ -177,6 +177,7 @@ export async function POST(request: Request) {
     });
 
     revalidatePath("/");
+    revalidatePath("/topics");
     revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/u/${post.author.twitterHandle}`);
     revalidatePath("/sitemap.xml");
@@ -223,6 +224,7 @@ export async function PUT(request: Request) {
     const { post, moderation, previous } = await updatePost(payload);
 
     revalidatePath("/");
+    revalidatePath("/topics");
     revalidatePath(`/r/${previous.topic.slug}`);
     revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/posts/${previous.slug}`);
@@ -270,6 +272,7 @@ export async function DELETE(request: Request) {
     const post = await deletePost(payload);
 
     revalidatePath("/");
+    revalidatePath("/topics");
     revalidatePath(`/r/${post.topic.slug}`);
     revalidatePath(`/posts/${post.slug}`);
     revalidatePath(`/u/${post.author.twitterHandle}`);

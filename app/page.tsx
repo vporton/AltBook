@@ -87,7 +87,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <a className="button-link" href="#post-workbench">
               Publish a post
             </a>
-            <a className="button-link secondary" href="#topics-title">
+            <a className="button-link secondary" href="/topics">
               Browse topics
             </a>
           </div>

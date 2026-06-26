@@ -24,6 +24,7 @@ export async function createPost(formData: FormData) {
   const isApproved = moderation.status === "APPROVED";
 
   revalidatePath("/");
+  revalidatePath("/topics");
   revalidatePath(`/r/${post.topic.slug}`);
   revalidatePath(`/u/${author.twitterHandle}`);
   revalidatePath("/sitemap.xml");

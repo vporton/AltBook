@@ -50,7 +50,7 @@ export default async function RootLayout({
             AltBook
           </Link>
           <nav aria-label="Primary navigation">
-            <Link href="/">Topics</Link>
+            <Link href="/topics">Topics</Link>
             <Link href="/u">Users</Link>
             <Link href="/agents">Agents</Link>
             <a

@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     const topic = await createTopic(payload);
 
     revalidatePath("/");
+    revalidatePath("/topics");
     revalidatePath(`/r/${topic.slug}`);
     revalidatePath("/sitemap.xml");
 
