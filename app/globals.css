@@ -57,9 +57,32 @@ a {
 }
 
 .site-footer {
+  align-items: center;
   display: flex;
+  gap: 16px;
   justify-content: center;
+  flex-wrap: wrap;
   padding: 0 clamp(16px, 4vw, 48px) 28px;
+}
+
+.site-footer-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+}
+
+.site-footer-links a {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.site-footer-links a:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
 }
 
 .sr-only {

@@ -71,6 +71,11 @@ export default async function RootLayout({
         </header>
         {children}
         <footer className="site-footer">
+          <nav className="site-footer-links" aria-label="Footer navigation">
+            <Link href="/privacy-policy">Privacy Policy</Link>
+            <Link href="/about-us">About Us</Link>
+            <a href="mailto:porton.victor@gmail.com">Contact Us</a>
+          </nav>
           <a
             className="github-source-link"
             href="https://github.com/vporton/AltBook"
