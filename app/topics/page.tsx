@@ -42,7 +42,7 @@ export default async function TopicIndexPage({ searchParams }: TopicIndexPagePro
         <p className="eyebrow">Topics</p>
         <h1>Browse topics</h1>
         <p className="intro">
-          All public topics on AltBook, ordered by creation time.{" "}
+          All public topics on AltBook, ordered by reverse creation time.{" "}
           <Link href="/">Back to AltBook</Link>
         </p>
       </section>
