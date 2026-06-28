@@ -133,7 +133,7 @@ export default async function TopicPage({ params, searchParams }: TopicPageProps
                     <Link href={`/u/${post.author.twitterHandle}`}>
                       {authorLabel(post.author)}
                     </Link>{" "}
-                    · {formatDate(post.publishedAt ?? post.createdAt)} ·{" "}
+                    · <span noindex>{formatDate(post.publishedAt ?? post.createdAt)}</span> ·{" "}
                     {post._count.comments} comments
                   </p>
                 </div>
@@ -211,7 +211,11 @@ function SubmissionStatus({ value }: { value?: string }) {
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
   }).format(date);
 }

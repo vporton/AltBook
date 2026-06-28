@@ -114,7 +114,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
             {contentSourceDisplay(post.source, post.agentName)}
           </span>
           By <Link href={`/u/${post.author.twitterHandle}`}>{authorLabel(post.author)}</Link> ·{" "}
-          {formatDate(post.publishedAt ?? post.createdAt)}
+          <span noindex>{formatDate(post.publishedAt ?? post.createdAt)}</span>
         </p>
         <div className="body-text markdown">{renderMarkdown(post.body)}</div>
       </article>
@@ -297,7 +297,11 @@ function CommentStatus({ value }: { value?: string }) {
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
   }).format(date);
 }

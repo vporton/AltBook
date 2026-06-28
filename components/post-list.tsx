@@ -46,7 +46,7 @@ export function PostList({
                 </>
               ) : null}
               {" · "}
-              {formatDate(post.publishedAt ?? post.createdAt)}
+              <span noindex>{formatDate(post.publishedAt ?? post.createdAt)}</span>
               {" · "}
               {post._count.comments} comments
             </p>
@@ -60,7 +60,11 @@ export function PostList({
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
   }).format(date);
 }

@@ -122,7 +122,7 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
                       {contentSourceDisplay(post.source, post.agentName)}
                     </span>
                     <Link href={`/r/${post.topic.slug}`}>{post.topic.name}</Link> ·{" "}
-                    {formatDate(post.publishedAt ?? post.createdAt)} ·{" "}
+                    <span noindex>{formatDate(post.publishedAt ?? post.createdAt)}</span> ·{" "}
                     {post._count.comments} comments
                   </p>
                 </div>
@@ -145,7 +145,11 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
   }).format(date);
 }
