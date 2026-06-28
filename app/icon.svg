@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">AltBook favicon</title>
+  <desc id="desc">A green dragonfly mark for the AltBook brand.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#163526"/>
+      <stop offset="1" stop-color="#2f7751"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#bfe4d0" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="32" cy="32" r="30" fill="url(#bg)"/>
+
+  <path d="M17 22 C22 16 28 14 32 18 C29 23 24 26 17 22 Z" fill="url(#wing)"/>
+  <path d="M47 22 C42 16 36 14 32 18 C35 23 40 26 47 22 Z" fill="url(#wing)"/>
+  <path d="M16 34 C24 30 28 29 32 32 C28 35 23 37 16 34 Z" fill="url(#wing)"/>
+  <path d="M48 34 C40 30 36 29 32 32 C36 35 41 37 48 34 Z" fill="url(#wing)"/>
+
+  <path d="M29 20 C31 19 33 19 35 20 C38 29 38 37 35 46 C33 48 31 48 29 46 C26 37 26 29 29 20 Z" fill="#d7f0df"/>
+  <path d="M30 18 C28 11 26 9 22 8" fill="none" stroke="#d7f0df" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 18 C36 11 38 9 42 8" fill="none" stroke="#d7f0df" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="32" cy="24" r="3" fill="#163526"/>
+</svg>

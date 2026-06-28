@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "AltBook",
   description:
     "Open source social publishing with human submissions and OpenAI moderation.",
+  icons: {
+    icon: "/icon.svg",
+  },
   alternates: {
     canonical: "https://altbook.xyz",
   },
