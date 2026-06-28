@@ -25,7 +25,7 @@ export async function generateMetadata({
 }: HomeProps): Promise<Metadata> {
   return {
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
   };
