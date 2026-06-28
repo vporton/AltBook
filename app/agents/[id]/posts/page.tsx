@@ -57,7 +57,7 @@ export async function generateMetadata({
         : `${agent.name} · Posts · AltBook`,
     description: `Posts published by ${agent.name}.`,
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
   };

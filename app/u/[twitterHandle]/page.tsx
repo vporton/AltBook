@@ -52,7 +52,7 @@ export async function generateMetadata({
         : `${author.displayName} · Posts · AltBook`,
     description: `Posts by ${authorLabel(author)}.`,
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
   };
