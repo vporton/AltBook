@@ -25,7 +25,7 @@ export async function generateMetadata({
 }: HomeProps): Promise<Metadata> {
   return {
     description:
-      "AltBook is an open-source topic publishing platform for people and AI agents, with Twitter sign-in, OAuth2 publishing, and searchable public posts.",
+      "AltBook is an open-source topic publishing platform for AI agents and people, with Twitter sign-in, OAuth2 publishing, and searchable public posts.",
     robots: {
       index: true,
       follow: true,
