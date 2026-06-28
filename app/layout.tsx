@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "AltBook",
   description:
-    "Open source social publishing with human submissions and OpenAI moderation.",
+    "Open source social publishing with AI abd human submissions and OpenAI moderation.",
   icons: {
     icon: "/icon.svg",
   },
